@@ -1,0 +1,8 @@
+.vscode/settings.json
+.gitognore
+utils
+*.xml
+.rels
+src/xlsx/files/td/xl/_rels/workbook.xml.rels
+src/xlsx/files/td/xl/worksheets/_rels/sheet1.xml.rels
+src/xlsx/files/td/xl/printerSettings/printerSettings1.bin
