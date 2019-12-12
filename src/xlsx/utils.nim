@@ -8,6 +8,7 @@ assert existsFile(fileName)
 
 type
   WorkBook* = Table[string, string]
+  ContentTypes* = seq[string]
 
 
 proc extractXml*(fileName: string) =
@@ -20,15 +21,55 @@ proc extractXml*(fileName: string) =
   assert existsDir("files/td/xl/worksheets")
   assert existsFile("files/td/xl/worksheets/sheet1.xml")
 
-proc praseWorkBook*(fileName: string): WorkBook =
-  template `=?=`(a, b: string): bool =
-    cmpIgnoreCase(a, b) == 0
+template `=?=`(a, b: string): bool =
+  cmpIgnoreCase(a, b) == 0
 
+proc parseContentTypes*(fileName: string): ContentTypes = 
+  # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
   var x: XmlParser
-  var name: string
+  defer: x.close()
   open(x, s, fileName)
+
+  while true:
+    x.next()
+    case x.kind
+    of xmlElementOpen:
+      # catch <Override
+      if x.elementName =?= "Override":
+        # ignore xmlElementOpen with name "Override"
+        x.next()
+        # maybe many attrs
+        while true:
+          case x.kind
+          of xmlAttribute:
+            if x.attrKey =?= "PartName":
+              result.add x.attrValue
+              break
+          of xmlElementClose:
+            break
+          else: discard
+          x.next()
+        x.next()
+    of xmlElementEnd:
+      discard
+    of xmlEof:
+      break
+    else:
+      discard
+
+  
+
+proc praseWorkBook*(fileName: string): WorkBook =
+  # open xml file
+  var s = newFileStream(fileName, fmRead)
+  if s == nil: quit("cannot open the file" & fileName)
+  var x: XmlParser
+  defer: x.close()
+  open(x, s, fileName)
+  
+  var name: string
   while true:
     x.next()
     case x.kind
@@ -41,6 +82,7 @@ proc praseWorkBook*(fileName: string): WorkBook =
         while x.kind == xmlElementOpen and x.elementName =?= "sheet":
           # ignore xmlElementOpen with name "sheet"
           x.next()
+          # maybe many sheets
           while true:
             case x.kind
             of xmlAttribute:
@@ -64,4 +106,5 @@ proc praseWorkBook*(fileName: string): WorkBook =
 
 
 when isMainModule:
+  echo parseContentTypes("files/td/[Content_Types].xml")
   echo praseWorkBook("files/td/xl/workbook.xml")
