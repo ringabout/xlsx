@@ -48,6 +48,7 @@ proc parseContentTypes*(fileName: string): ContentTypes =
         while true:
           case x.kind
           of xmlAttribute:
+            # match attr PartName
             if x.attrKey =?= "PartName":
               result.add x.attrValue
               break
@@ -59,32 +60,41 @@ proc parseContentTypes*(fileName: string): ContentTypes =
     of xmlElementEnd:
       discard
     of xmlEof:
-      break
+      break     # end the world
     else:
       discard
 
 proc parseStringTable*(x: var XmlParser, res: var seq[string]) =
   var count = 0
   while true:
+    # match <si>
     if x.matchKindName(xmlElementStart, "si"):
+      # ignore <si>
       x.next()
+      # match attrs in <si>
+      # maybe <t> , <phoneticPr and so on.
       while true:
+        # macth <t>
         if x.matchKindName(xmlElementStart, "t"):
+          # ignore <t>
           x.next()
+          # match charData in <t>
           while x.kind == xmlCharData:
             res[count] &= x.charData
             x.next()
+          # seq index
           count += 1
+          # if match chardata, end loop
           break
         else:
           discard
-    elif x.kind == xmlEof:
+        # switch to the next element
+        x.next()
+    elif x.kind == xmlEof: # end the world
       break
     else:
       discard
     x.next()
-
-
 
 proc parseSharedString*(fileName: string): SharedStrings =
   # open xml file
@@ -98,20 +108,26 @@ proc parseSharedString*(fileName: string): SharedStrings =
     x.next()
     case x.kind
     of xmlElementOpen:
+      # match <sst>
       if x.elementName =?= "sst":
+        # match attrs in <sst>
         while true:
+          # ignore <sst
           x.next()
           case x.kind
           of xmlAttribute:
+            # match attr count
             if x.attrKey =?= "count":
+              # initial seq that stores strings
               result = newSeq[string](parseInt(x.attrValue))
           of xmlElementStart:
+            # match <si>, then parse StringTable
             x.parseStringTable(result)
             break
           else:
             discard
     of xmlEof:
-      break
+      break # end the world
     else:
       discard
 
