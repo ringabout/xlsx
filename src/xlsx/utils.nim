@@ -1,4 +1,4 @@
-import os, streams, parsexml, strutils, tables
+import os, streams, parsexml, strutils, tables, times
 
 import zip / zipfiles
 
@@ -6,10 +6,41 @@ import zip / zipfiles
 const fileName = "./test.xlsx"
 assert existsFile(fileName)
 
+# b for boolean
+# d for date
+# e for error
+# inlineStr for an inline string (i.e., not stored in the shared strings part, but directly in the cell)
+# n for number
+# s for shared string (so stored in the shared strings part and not in the cell)
+# str for a formula (a string representing the formula)
+
+
 type
+  SheetDataKind* {.pure.} = enum
+    Boolean, Date, Error, InLineStr, Num, SharedString, Formula 
+  sdk = SheetDataKind
   WorkBook* = Table[string, string]
   ContentTypes* = seq[string]
   SharedStrings* = seq[string]
+  SheetData* = object
+    case kind: SheetDataKind
+    of sdk.Boolean:
+      bvalue: bool
+    of sdk.Date:
+      dvalue: DateTime
+    of sdk.Num:
+      nvalue: string
+    of sdk.SharedString:
+      svalue: string
+    of sdk.Formula:
+      fvalue: string
+      fnvalue: string
+    else:
+      discard
+
+  Sheet* = object
+    rows, cols: int
+    data: seq[SheetData]
 
 
 proc extractXml*(fileName: string) =
@@ -131,8 +162,6 @@ proc parseSharedString*(fileName: string): SharedStrings =
     else:
       discard
 
-
-
 proc praseWorkBook*(fileName: string): WorkBook =
   # open xml file
   var s = newFileStream(fileName, fmRead)
@@ -172,7 +201,7 @@ proc praseWorkBook*(fileName: string): WorkBook =
       # over
       break
 
-
+proc parseSheet*(fileName: string) = discard
 
 when isMainModule:
   echo parseContentTypes("files/td/[Content_Types].xml")
