@@ -9,9 +9,10 @@ assert existsFile(fileName)
 
 type
   # newException(SheetDataKindError, "unKnown sheet data kind")
-  SheetDataKindError* = ref Exception
+  XlsxError* = object of Exception 
+  SheetDataKindError* = object of XlsxError
   SheetDataKind* {.pure.} = enum
-    Boolean, Date, Error, InLineStr, Num, SharedString, Formula
+    Boolean, Date, Error, InlineStr, Num, SharedString, Formula
   sdk = SheetDataKind
   WorkBook* = Table[string, string]
   ContentTypes* = seq[string]
@@ -22,6 +23,8 @@ type
       bvalue: string
     of sdk.Date:
       dvalue: string
+    of sdk.InlineStr:
+      isvalue: string
     of sdk.Num:
       nvalue: string
     of sdk.SharedString:
@@ -31,9 +34,6 @@ type
       fnvalue: string
     of sdk.Error:
       error: string
-    else:
-      discard
-
   Sheet* = object
     rows, cols: int
     data: seq[SheetData]
@@ -78,7 +78,6 @@ proc parseContentTypes*(fileName: string): ContentTypes =
             # match attr PartName
             if x.attrKey =?= "PartName":
               result.add x.attrValue
-              break
           of xmlElementClose:
             break
           else: discard
@@ -207,14 +206,6 @@ proc praseWorkBook*(fileName: string): WorkBook =
 # str for a formula (a string representing the formula)
 
 
-#[
-<c r="B1" t="s">
-<v>1</v>
-</c>
-]#
-
-# Boolean, Date, Error, InLineStr, Num, SharedString, Formula
-
 proc parseSheetDataBoolean(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.Boolean)
   # ignore <v>
@@ -266,10 +257,79 @@ proc parseSheetDataFormula(x: var XmlParser): SheetData {.inline.} =
   x.next()
   # point to </c>
 
+# <c r="C4" s="2" t="inlineStr">
+# <is>
+# <t>my string</t>
+# </is>
+# </c>
 
-proc parseSheet*(fileName: string) = discard
+proc parseSheetDataInlineStr(x: var XmlParser): SheetData {.inline.} = 
+  result = SheetData(kind: sdk.InlineStr)
+  # ignore <is>
+  x.next()
+  # ignore <t>
+  while x.kind == xmlCharData:
+    result.isvalue &= x.charData
+    x.next()
+  # ignore </t>
+  x.next()
+  # ignore </is>
+  x.next()
+  # point to </c>s
+
+proc parseSheetDate(x: var XmlParser): SheetData {.inline.} =
+  result = SheetData(kind: sdk.Date)
+  # ignore <v>
+  x.next()
+  while x.kind == xmlCharData:
+    result.nvalue &= x.charData
+    x.next()
+  # ignore </v>
+  x.next()
+  # point to </c>
+
+proc parseDimension*(x: string): (int, int) = 
+  discard
+
+
+
+proc parseSheet*(fileName: string): Sheet = 
+  # open xml file
+  var s = newFileStream(fileName, fmRead)
+  if s == nil: quit("cannot open the file" & fileName)
+  var x: XmlParser
+  defer: x.close()
+  open(x, s, fileName)
+
+  x.next()
+  while true:
+    x.next()
+    # parse Dimension
+    if x.matchKindName(xmlElementOpen, "dimension"): 
+      x.next()
+      while true:
+        case x.kind
+        of xmlAttribute:
+          if x.attrKey =?= "ref":
+            echo x.attrValue
+            (result.rows, result.cols) = parseDimension(x.attrValue)
+        of xmlElementClose:
+          break
+        else:
+          discard
+        x.next()
+      x.next()
+    if x.kind == xmlEof:
+      break
+    
+      
+
+
+  
+  
 
 when isMainModule:
   echo parseContentTypes("files/td/[Content_Types].xml")
   echo praseWorkBook("files/td/xl/workbook.xml")
   echo parseSharedString("files/td/xl/sharedStrings.xml")
+  echo parseSheet("files/td/xl/worksheets/sheet1.xml")
