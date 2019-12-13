@@ -1,9 +1,11 @@
-import os, streams, parsexml, strutils, tables, times
+import os, streams, parsexml, parseutils, strutils, tables, times
 
 import zip / zipfiles
 
 
-const fileName = "./test.xlsx"
+const 
+  UpperLetters = {'A' .. 'Z'}
+  fileName = "./test.xlsx"
 assert existsFile(fileName)
 
 
@@ -287,10 +289,18 @@ proc parseSheetDate(x: var XmlParser): SheetData {.inline.} =
   x.next()
   # point to </c>
 
+# A1:B3
 proc parseDimension*(x: string): (int, int) =
-  discard
-
-
+  var
+    rowLeft, rowRight: int
+    colLeft, colRight: string
+    pos = 0
+  pos += parseWhile(x, colRight, UpperLetters, pos)
+  pos += parseInt(x, rowRight, pos)
+  pos += skip(x, ":", pos)
+  pos += parseWhile(x, colLeft, UpperLetters, pos)
+  pos += parseInt(x, rowLeft, pos) 
+  
 
 proc parseSheet*(fileName: string): Sheet =
   # open xml file
