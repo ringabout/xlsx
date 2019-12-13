@@ -6,18 +6,12 @@ import zip / zipfiles
 const fileName = "./test.xlsx"
 assert existsFile(fileName)
 
-# b for boolean
-# d for date
-# e for error
-# inlineStr for an inline string (i.e., not stored in the shared strings part, but directly in the cell)
-# n for number
-# s for shared string (so stored in the shared strings part and not in the cell)
-# str for a formula (a string representing the formula)
-
 
 type
+  # newException(SheetDataKindError, "unKnown sheet data kind")
+  SheetDataKindError* = ref Exception
   SheetDataKind* {.pure.} = enum
-    Boolean, Date, Error, InLineStr, Num, SharedString, Formula 
+    Boolean, Date, Error, InLineStr, Num, SharedString, Formula
   sdk = SheetDataKind
   WorkBook* = Table[string, string]
   ContentTypes* = seq[string]
@@ -25,9 +19,9 @@ type
   SheetData* = object
     case kind: SheetDataKind
     of sdk.Boolean:
-      bvalue: bool
+      bvalue: string
     of sdk.Date:
-      dvalue: DateTime
+      dvalue: string
     of sdk.Num:
       nvalue: string
     of sdk.SharedString:
@@ -35,6 +29,8 @@ type
     of sdk.Formula:
       fvalue: string
       fnvalue: string
+    of sdk.Error:
+      error: string
     else:
       discard
 
@@ -91,7 +87,7 @@ proc parseContentTypes*(fileName: string): ContentTypes =
     of xmlElementEnd:
       discard
     of xmlEof:
-      break     # end the world
+      break # end the world
     else:
       discard
 
@@ -200,6 +196,76 @@ proc praseWorkBook*(fileName: string): WorkBook =
         x.next()
       # over
       break
+
+
+# b for boolean
+# d for date
+# e for error
+# inlineStr for an inline string (i.e., not stored in the shared strings part, but directly in the cell)
+# n for number
+# s for shared string (so stored in the shared strings part and not in the cell)
+# str for a formula (a string representing the formula)
+
+
+#[
+<c r="B1" t="s">
+<v>1</v>
+</c>
+]#
+
+# Boolean, Date, Error, InLineStr, Num, SharedString, Formula
+
+proc parseSheetDataBoolean(x: var XmlParser): SheetData {.inline.} =
+  result = SheetData(kind: sdk.Boolean)
+  # ignore <v>
+  x.next()
+  while x.kind == xmlCharData:
+    result.bvalue &= x.charData
+    x.next()
+  # ignore </v>
+  x.next()
+  # point to </c>
+
+proc parseSheetDataNum(x: var XmlParser): SheetData {.inline.} =
+  result = SheetData(kind: sdk.Num)
+  # ignore <v>
+  x.next()
+  while x.kind == xmlCharData:
+    result.nvalue &= x.charData
+    x.next()
+  # ignore </v>
+  x.next()
+  # point to </c>
+
+proc parseSheetDataSharedString(x: var XmlParser): SheetData {.inline.} =
+  result = SheetData(kind: sdk.SharedString)
+  # ignore <v>
+  x.next()
+  while x.kind == xmlCharData:
+    result.svalue &= x.charData
+    x.next()
+  # ignore </v>
+  x.next()
+  # point to </c>
+
+proc parseSheetDataFormula(x: var XmlParser): SheetData {.inline.} =
+  result = SheetData(kind: sdk.Formula)
+  # ignore <f>
+  x.next()
+  while x.kind == xmlCharData:
+    result.fvalue &= x.charData
+    x.next()
+  # ignore </f>
+  x.next()
+  # ignore <v>
+  x.next()
+  while x.kind == xmlCharData:
+    result.fnvalue &= x.charData
+    x.next()
+  # ignore </v>
+  x.next()
+  # point to </c>
+
 
 proc parseSheet*(fileName: string) = discard
 
