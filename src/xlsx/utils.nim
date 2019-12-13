@@ -9,7 +9,7 @@ assert existsFile(fileName)
 
 type
   # newException(SheetDataKindError, "unKnown sheet data kind")
-  XlsxError* = object of Exception 
+  XlsxError* = object of Exception
   SheetDataKindError* = object of XlsxError
   SheetDataKind* {.pure.} = enum
     Boolean, Date, Error, InlineStr, Num, SharedString, Formula
@@ -78,11 +78,10 @@ proc parseContentTypes*(fileName: string): ContentTypes =
             # match attr PartName
             if x.attrKey =?= "PartName":
               result.add x.attrValue
-          of xmlElementClose:
+          of xmlElementEnd:
             break
           else: discard
           x.next()
-        x.next()
     of xmlElementEnd:
       discard
     of xmlEof:
@@ -186,12 +185,12 @@ proc praseWorkBook*(fileName: string): WorkBook =
             # parse sheetId -> "s1"
             if x.attrKey =?= "sheetId":
               result[name] = x.attrValue
-          of xmlElementClose:
+          of xmlElementEnd:
             break
           else: discard
           # ignore element
           x.next()
-        # ignore xmlElementClose
+        # ignore xmlElementEnd />
         x.next()
       # over
       break
@@ -263,7 +262,7 @@ proc parseSheetDataFormula(x: var XmlParser): SheetData {.inline.} =
 # </is>
 # </c>
 
-proc parseSheetDataInlineStr(x: var XmlParser): SheetData {.inline.} = 
+proc parseSheetDataInlineStr(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.InlineStr)
   # ignore <is>
   x.next()
@@ -288,12 +287,12 @@ proc parseSheetDate(x: var XmlParser): SheetData {.inline.} =
   x.next()
   # point to </c>
 
-proc parseDimension*(x: string): (int, int) = 
+proc parseDimension*(x: string): (int, int) =
   discard
 
 
 
-proc parseSheet*(fileName: string): Sheet = 
+proc parseSheet*(fileName: string): Sheet =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
@@ -302,10 +301,10 @@ proc parseSheet*(fileName: string): Sheet =
   open(x, s, fileName)
 
   x.next()
+  # parse Dimension
   while true:
     x.next()
-    # parse Dimension
-    if x.matchKindName(xmlElementOpen, "dimension"): 
+    if x.matchKindName(xmlElementOpen, "dimension"):
       x.next()
       while true:
         case x.kind
@@ -313,20 +312,26 @@ proc parseSheet*(fileName: string): Sheet =
           if x.attrKey =?= "ref":
             echo x.attrValue
             (result.rows, result.cols) = parseDimension(x.attrValue)
-        of xmlElementClose:
+        of xmlElementEnd:
           break
         else:
           discard
         x.next()
+      # discard />
       x.next()
-    if x.kind == xmlEof:
       break
-    
-      
+  # parse data
+  while true:
+    x.next()
+    case x.kind
+    of xmlElementStart:
+      if x.elementName =?= "sheetData":
+        discard
+    of xmlEof:
+      break
+    else:
+      discard
 
-
-  
-  
 
 when isMainModule:
   echo parseContentTypes("files/td/[Content_Types].xml")
