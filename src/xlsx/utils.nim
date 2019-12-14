@@ -5,6 +5,7 @@ import zip / zipfiles
 
 const 
   UpperLetters = {'A' .. 'Z'}
+  CharDataOption = {xmlCharData, xmlWhitespace}
   fileName = "./test.xlsx"
 assert existsFile(fileName)
 
@@ -106,11 +107,11 @@ proc parseStringTable*(x: var XmlParser, res: var seq[string]) =
           # ignore <t>
           x.next()
           # match charData in <t>
-          while x.kind == xmlCharData:
+          while x.kind in CharDataOption:
             res[count] &= x.charData
             x.next()
           # seq index
-          count += 1
+          inc(count)
           # if match chardata, end loop
           break
         else:
@@ -129,7 +130,7 @@ proc parseSharedString*(fileName: string): SharedStrings =
   if s == nil: quit("cannot open the file" & fileName)
   var x: XmlParser
   defer: x.close()
-  open(x, s, fileName)
+  open(x, s, fileName, {reportWhitespace})
 
   while true:
     x.next()
@@ -233,7 +234,7 @@ proc parseSheetDataSharedString(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.SharedString)
   # ignore <v>
   x.next()
-  while x.kind == xmlCharData:
+  while x.kind in CharDataOption:
     result.svalue &= x.charData
     x.next()
   # ignore </v>
@@ -244,7 +245,7 @@ proc parseSheetDataFormula(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.Formula)
   # ignore <f>
   x.next()
-  while x.kind == xmlCharData:
+  while x.kind in CharDataOption:
     result.fvalue &= x.charData
     x.next()
   # ignore </f>
@@ -269,7 +270,7 @@ proc parseSheetDataInlineStr(x: var XmlParser): SheetData {.inline.} =
   # ignore <is>
   x.next()
   # ignore <t>
-  while x.kind == xmlCharData:
+  while x.kind in CharDataOption:
     result.isvalue &= x.charData
     x.next()
   # ignore </t>
@@ -282,7 +283,7 @@ proc parseSheetDate(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.Date)
   # ignore <v>
   x.next()
-  while x.kind == xmlCharData:
+  while x.kind in CharDataOption:
     result.nvalue &= x.charData
     x.next()
   # ignore </v>
@@ -316,7 +317,7 @@ proc parseSheet*(fileName: string): Sheet =
   if s == nil: quit("cannot open the file" & fileName)
   var x: XmlParser
   defer: x.close()
-  open(x, s, fileName)
+  open(x, s, fileName, {reportWhitespace})
 
   x.next()
   # parse Dimension
@@ -344,11 +345,24 @@ proc parseSheet*(fileName: string): Sheet =
     case x.kind
     of xmlElementStart:
       if x.elementName =?= "sheetData":
-        discard
+        # ignore <sheetData>
+        while true:
+          x.next()
+          if x.matchKindName(xmlElementOpen, "row"):
+            while true:
+              x.next()
+              case x.kind
+              of xmlElementClose:
+                break
+              else: 
+                discard
+            # ignore />
+            x.next()
     of xmlEof:
       break
     else:
       discard
+    return
 
 
 when isMainModule:
