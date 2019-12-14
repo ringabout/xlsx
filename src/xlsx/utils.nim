@@ -289,18 +289,26 @@ proc parseSheetDate(x: var XmlParser): SheetData {.inline.} =
   x.next()
   # point to </c>
 
+proc calculatePolynomial(a: string): int =
+  for i in 0 .. a.high:
+    # !Maybe raise alpha
+    result = result * 27 + (ord(a[i]) - ord('A') + 1)
+
 # A1:B3
 proc parseDimension*(x: string): (int, int) =
   var
     rowLeft, rowRight: int
     colLeft, colRight: string
+    row, col: int
     pos = 0
-  pos += parseWhile(x, colRight, UpperLetters, pos)
-  pos += parseInt(x, rowRight, pos)
-  pos += skip(x, ":", pos)
   pos += parseWhile(x, colLeft, UpperLetters, pos)
-  pos += parseInt(x, rowLeft, pos) 
-  
+  pos += parseInt(x, rowLeft, pos)
+  pos += skip(x, ":", pos)
+  pos += parseWhile(x, colRight, UpperLetters, pos)
+  pos += parseInt(x, rowRight, pos) 
+  row = rowRight - rowLeft + 1
+  col = calculatePolynomial(colRight) - calculatePolynomial(colLeft) + 1
+  result = (row, col)
 
 proc parseSheet*(fileName: string): Sheet =
   # open xml file
