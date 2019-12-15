@@ -37,8 +37,11 @@ type
       fnvalue: string
     of sdk.Error:
       error: string
-  Sheet* = object
+  SheetInfo* = tuple
     rows, cols: int
+    start: string
+  Sheet* = object
+    info: SheetInfo
     data: seq[SheetData]
 
 
@@ -296,7 +299,7 @@ proc calculatePolynomial(a: string): int =
     result = result * 27 + (ord(a[i]) - ord('A') + 1)
 
 # A1:B3
-proc parseDimension*(x: string): (int, int) =
+proc parseDimension*(x: string): SheetInfo =
   var
     rowLeft, rowRight: int
     colLeft, colRight: string
@@ -309,7 +312,41 @@ proc parseDimension*(x: string): (int, int) =
   pos += parseInt(x, rowRight, pos) 
   row = rowRight - rowLeft + 1
   col = calculatePolynomial(colRight) - calculatePolynomial(colLeft) + 1
-  result = (row, col)
+  result = (row, col, colLeft & $rowLeft)
+
+proc parsePos*(x: string, s: SheetInfo): int = 
+  var
+    rowRight, rowLeft: int
+    colRight, colLeft: string
+    row, col: int
+    pos = 0
+  pos += parseWhile(x, colRight, UpperLetters, pos)
+  pos += parseInt(x, rowRight, pos)
+  pos = 0
+  pos += parseWhile(s.start, colLeft, UpperLetters, pos)
+  pos += parseInt(s.start, rowLeft, pos)
+  row = rowRight - rowLeft 
+  col = calculatePolynomial(colRight) - calculatePolynomial(colLeft) 
+  result = row * s.cols + col 
+
+proc parseColData*(x: var XmlParser) = 
+  discard
+
+proc parseRowData*(x: var XmlParser) =
+  while true:
+    x.next()
+    case x.kind
+    of xmlElementOpen:
+      if x.elementName =?= "c":
+        discard
+    of xmlEof:
+      break
+    else: 
+      discard
+  # ignore />
+  x.next()
+
+
 
 proc parseSheet*(fileName: string): Sheet =
   # open xml file
@@ -330,7 +367,7 @@ proc parseSheet*(fileName: string): Sheet =
         of xmlAttribute:
           if x.attrKey =?= "ref":
             echo x.attrValue
-            (result.rows, result.cols) = parseDimension(x.attrValue)
+            result.info = parseDimension(x.attrValue)
         of xmlElementEnd:
           break
         else:
@@ -346,23 +383,22 @@ proc parseSheet*(fileName: string): Sheet =
     of xmlElementStart:
       if x.elementName =?= "sheetData":
         # ignore <sheetData>
+        x.next()
         while true:
+          case x.kind
+          of xmlElementOpen:
+            if x.elementName == "row":
+              discard
+          of xmlEof:
+            break
+          else:
+            discard
           x.next()
-          if x.matchKindName(xmlElementOpen, "row"):
-            while true:
-              x.next()
-              case x.kind
-              of xmlElementClose:
-                break
-              else: 
-                discard
-            # ignore />
-            x.next()
     of xmlEof:
       break
     else:
       discard
-    return
+
 
 
 when isMainModule:
@@ -370,3 +406,6 @@ when isMainModule:
   echo praseWorkBook("files/td/xl/workbook.xml")
   echo parseSharedString("files/td/xl/sharedStrings.xml")
   echo parseSheet("files/td/xl/worksheets/sheet1.xml")
+  echo repeat("-", 40)
+  echo parsePos("A2", (3, 2, "A1"))
+  echo repeat("-", 40)
