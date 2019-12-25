@@ -15,7 +15,7 @@ type
   XlsxError* = object of Exception
   SheetDataKindError* = object of XlsxError
   SheetDataKind* {.pure.} = enum
-    Boolean, Date, Error, InlineStr, Num, SharedString, Formula
+    Initial, Boolean, Date, Error, InlineStr, Num, SharedString, Formula
   sdk = SheetDataKind
   WorkBook* = Table[string, string]
   ContentTypes* = seq[string]
@@ -37,6 +37,8 @@ type
       fnvalue: string
     of sdk.Error:
       error: string
+    else:
+      discard
   SheetInfo* = tuple
     rows, cols: int
     start: string
@@ -329,16 +331,53 @@ proc parsePos*(x: string, s: SheetInfo): int =
   col = calculatePolynomial(colRight) - calculatePolynomial(colLeft) 
   result = row * s.cols + col 
 
-proc parseColData*(x: var XmlParser) = 
-  discard
 
-proc parseRowData*(x: var XmlParser) =
+proc dataKind(s: string): SheetDataKind {.inline.} =
+  # <c r="A2" t="s">
+  ## convert string to SheetDataKind
+  result = case s
+  of "b": sdk.Boolean
+  of "d": sdk.Date
+  of "e": sdk.Error
+  of "inlineStr": sdk.InlineStr
+  of "n": sdk.Num
+  of "s": sdk.SharedString
+  of "str": sdk.Formula
+  else: raise
+
+
+proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetDataKind) = 
+  # <c r="A2" t="s">
+  var
+    pos: int
+    kind: SheetDataKind
+  while true:
+    x.next()
+    case x.kind
+    of xmlAttribute:
+      # catch key "r"
+      if x.attrKey =?= "r":
+        pos = parsePos(x.attrValue, s)
+      # catch key "t"
+      elif x.attrKey =?= "t":
+        kind = dataKind(x.attrValue)
+    of xmlElementEnd, xmlEof:
+      break 
+    else:
+      discard
+  # if omit key "t", it should be sdk.Num kind.
+  if kind == sdk.Initial:
+    kind = sdk.Num
+  result = (pos, kind)
+
+
+proc parseRowData*(x: var XmlParser, s: Sheet) =
   while true:
     x.next()
     case x.kind
     of xmlElementOpen:
       if x.elementName =?= "c":
-        discard
+        echo parseRowMetaData(x, s.info)
     of xmlEof:
       break
     else: 
@@ -387,8 +426,8 @@ proc parseSheet*(fileName: string): Sheet =
         while true:
           case x.kind
           of xmlElementOpen:
-            if x.elementName == "row":
-              discard
+            if x.elementName =?= "row":
+              parseRowData(x, result)
           of xmlEof:
             break
           else:
