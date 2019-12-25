@@ -345,12 +345,16 @@ proc dataKind(s: string): SheetDataKind {.inline.} =
   of "str": sdk.Formula
   else: raise
 
+# proc parseValue(x: var XmlParser): string =
+#   while true:
+#     if x.matchKindName(xmlElementOpen, "v"):
 
 proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetDataKind) = 
   # <c r="A2" t="s">
   var
     pos: int
     kind: SheetDataKind
+    value: string
   while true:
     x.next()
     case x.kind
@@ -366,9 +370,22 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetDataKind) =
     else:
       discard
   # if omit key "t", it should be sdk.Num kind.
+  if x.matchKindName(xmlElementOpen, "v"):
+    while true:
+      x.next()
+      case x.kind
+      of xmlCharData, xmlWhitespace:
+        value.add(x.charData)
+      of xmlElementEnd:
+        break
+      else:
+        discard
+  
   if kind == sdk.Initial:
     kind = sdk.Num
   result = (pos, kind)
+
+
 
 
 proc parseRowData*(x: var XmlParser, s: Sheet) =
@@ -377,7 +394,9 @@ proc parseRowData*(x: var XmlParser, s: Sheet) =
     case x.kind
     of xmlElementOpen:
       if x.elementName =?= "c":
-        echo parseRowMetaData(x, s.info)
+        let (pos, kind) = parseRowMetaData(x, s.info)
+
+        # s.data[pos] = 
     of xmlEof:
       break
     else: 
