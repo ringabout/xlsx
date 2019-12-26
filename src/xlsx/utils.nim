@@ -3,7 +3,7 @@ import os, streams, parsexml, parseutils, strutils, tables, times
 import zip / zipfiles
 
 
-const 
+const
   UpperLetters = {'A' .. 'Z'}
   CharDataOption = {xmlCharData, xmlWhitespace}
   fileName = "./test.xlsx"
@@ -311,12 +311,12 @@ proc parseDimension*(x: string): SheetInfo =
   pos += parseInt(x, rowLeft, pos)
   pos += skip(x, ":", pos)
   pos += parseWhile(x, colRight, UpperLetters, pos)
-  pos += parseInt(x, rowRight, pos) 
+  pos += parseInt(x, rowRight, pos)
   row = rowRight - rowLeft + 1
   col = calculatePolynomial(colRight) - calculatePolynomial(colLeft) + 1
   result = (row, col, colLeft & $rowLeft)
 
-proc parsePos*(x: string, s: SheetInfo): int = 
+proc parsePos*(x: string, s: SheetInfo): int =
   var
     rowRight, rowLeft: int
     colRight, colLeft: string
@@ -327,9 +327,9 @@ proc parsePos*(x: string, s: SheetInfo): int =
   pos = 0
   pos += parseWhile(s.start, colLeft, UpperLetters, pos)
   pos += parseInt(s.start, rowLeft, pos)
-  row = rowRight - rowLeft 
-  col = calculatePolynomial(colRight) - calculatePolynomial(colLeft) 
-  result = row * s.cols + col 
+  row = rowRight - rowLeft
+  col = calculatePolynomial(colRight) - calculatePolynomial(colLeft)
+  result = row * s.cols + col
 
 
 proc dataKind(s: string): SheetDataKind {.inline.} =
@@ -349,12 +349,12 @@ proc dataKind(s: string): SheetDataKind {.inline.} =
 #   while true:
 #     if x.matchKindName(xmlElementOpen, "v"):
 
-proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetDataKind) = 
+proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
   # <c r="A2" t="s">
   var
     pos: int
     kind: SheetDataKind
-    value: string
+    value: SheetData
   while true:
     x.next()
     case x.kind
@@ -365,41 +365,119 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetDataKind) =
       # catch key "t"
       elif x.attrKey =?= "t":
         kind = dataKind(x.attrValue)
-    of xmlElementEnd, xmlEof:
-      break 
+    of xmlElementClose, xmlEof:
+      break
     else:
       discard
   # if omit key "t", it should be sdk.Num kind.
-  if x.matchKindName(xmlElementOpen, "v"):
+  if kind == sdk.Initial:
+    kind = sdk.Num
+  case kind
+  of sdk.Boolean:
     while true:
       x.next()
       case x.kind
-      of xmlCharData, xmlWhitespace:
-        value.add(x.charData)
+      of xmlElementStart:
+        if x.elementName =?= "v":
+          value = x.parseSheetDataBoolean
       of xmlElementEnd:
+        if x.elementName =?= "c":
+          break
+      of xmlEof:
         break
       else:
         discard
-  
-  if kind == sdk.Initial:
-    kind = sdk.Num
-  result = (pos, kind)
+  of sdk.Date:
+    while true:
+      x.next()
+      case x.kind
+      of xmlElementStart:
+        if x.elementName =?= "v":
+          value = x.parseSheetDate
+      of xmlElementEnd:
+        if x.elementName =?= "c":
+          break
+      of xmlEof:
+        break
+      else:
+        discard
+  of sdk.InlineStr:
+    while true:
+      x.next()
+      case x.kind
+      of xmlElementStart:
+        if x.elementName =?= "is":
+          value = x.parseSheetDataInlineStr
+      of xmlElementEnd:
+        if x.elementName =?= "c":
+          break
+      of xmlEof:
+        break
+      else:
+        discard
+  of sdk.Num:
+    while true:
+      x.next()
+      case x.kind
+      of xmlElementStart:
+        if x.elementName =?= "v":
+          value = x.parseSheetDataNum
+      of xmlElementEnd:
+        if x.elementName =?= "c":
+          break
+      of xmlEof:
+        break
+      else:
+        discard
+  of sdk.SharedString:
+    while true:
+      x.next()
+      case x.kind
+      of xmlElementStart:
+        if x.elementName =?= "v":
+          value = x.parseSheetDataSharedString
+      of xmlElementEnd:
+        if x.elementName =?= "c":
+          break
+      of xmlEof:
+        break
+      else:
+        discard
+  of sdk.Formula:
+    while true:
+      x.next()
+      case x.kind
+      of xmlElementStart:
+        if x.elementName =?= "f":
+          value = x.parseSheetDataFormula
+      of xmlElementEnd:
+        if x.elementName =?= "c":
+          break
+      of xmlEof:
+        break
+      else:
+        discard
+  else:
+    raise newException(XlsxError, "not support" & $kind)
+
+
+
+  result = (pos, value)
 
 
 
 
-proc parseRowData*(x: var XmlParser, s: Sheet) =
+proc parseRowData*(x: var XmlParser, s: var Sheet) =
   while true:
     x.next()
     case x.kind
     of xmlElementOpen:
       if x.elementName =?= "c":
-        let (pos, kind) = parseRowMetaData(x, s.info)
-
-        # s.data[pos] = 
+        let (pos, value) = parseRowMetaData(x, s.info)
+        s.data[pos] = value
     of xmlEof:
       break
-    else: 
+    else:
       discard
   # ignore />
   x.next()
@@ -426,6 +504,7 @@ proc parseSheet*(fileName: string): Sheet =
           if x.attrKey =?= "ref":
             echo x.attrValue
             result.info = parseDimension(x.attrValue)
+            result.data = newSeq[SheetData](result.info.rows * result.info.cols)
         of xmlElementEnd:
           break
         else:
