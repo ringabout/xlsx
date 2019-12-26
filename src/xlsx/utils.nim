@@ -329,10 +329,6 @@ proc parseDataKind(s: string): SheetDataKind {.inline.} =
   of "str": sdk.Formula
   else: raise
 
-# proc parseValue(x: var XmlParser): string =
-#   while true:
-#     if x.matchKindName(xmlElementOpen, "v"):
-
 proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
   # <c r="A2" t="s">
   var
@@ -582,11 +578,23 @@ proc parseExcel(fileName: string): SheetArray =
   # echo plotSym(sheet.info.cols)
   # xlsxToCsv(sheet, sharedstring, sep = ", ")
 
+proc toCsv*(s: SheetArray, dest: string, sep = ",") =
+  let f = open(dest, fmWrite)
+  defer: f.close()
+  let (rows, cols) = s.shape
+  for i in 0 ..< rows:
+    var res = ""
+    for j in 0 ..< cols:
+      res.add s.data[i * cols + j]
+      if j < cols - 1:
+        res.add sep
+    f.writeLine res
+
 
 when isMainModule:
   import timeit
-  timeOnce("test"):
-    echo parseExcel("./test.xlsx")
+  let data = parseExcel("./test.xlsx")
+  data.toCsv("t2.csv")
   # echo repeat("-", 40)
   # echo parsePos("A2", (3, 2, "A1"))
   # echo repeat("-", 40)
