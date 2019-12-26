@@ -572,11 +572,21 @@ proc parseExcel(fileName: string): SheetArray =
     sheet = parseSheet("files/td/xl/worksheets/sheet2.xml")
 
   result = getSheetArray(sheet, sharedstring)
-  # echo plotSym(sheet.info.cols)
-  # for item in sheet.get(sharedstring, sep = "|"):
-  #   echo item
-  # echo plotSym(sheet.info.cols)
-  # xlsxToCsv(sheet, sharedstring, sep = ", ")
+
+
+proc `$`*(s: SheetArray): string =
+  let 
+    (rows, cols) = s.shape
+    width = 10
+  result.add plotSym(cols) & "\n"
+  for i in 0 ..< rows:
+    var res = "|"
+    for j in 0 ..< cols:
+      let item = s.data[i * cols + j]
+      res.add alignLeft(item, width)
+      res.add "|"
+    result.add res & "\n"
+  result.add plotSym(cols) & "\n"
 
 proc toCsv*(s: SheetArray, dest: string, sep = ",") =
   let f = open(dest, fmWrite)
@@ -592,8 +602,8 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") =
 
 
 when isMainModule:
-  import timeit
   let data = parseExcel("./test.xlsx")
+  echo data
   data.toCsv("t2.csv")
   # echo repeat("-", 40)
   # echo parsePos("A2", (3, 2, "A1"))
