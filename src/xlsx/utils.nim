@@ -545,39 +545,64 @@ proc xlsxToCsv(s: Sheet, str: SharedStrings, fileName = "test.csv", sep = ",") =
   for i in 0 ..< rows:
     var res = ""
     for j in 0 ..< cols:
-      let item = s.data[i * cols + j] 
+      let item = s.data[i * cols + j]
       case item.kind
       of sdk.SharedString:
-        res.add str[parseInt(item.svalue)] 
+        res.add str[parseInt(item.svalue)]
       of sdk.Num:
-        res.add item.nvalue 
+        res.add item.nvalue
       else:
         raise
       if j < cols - 1:
         res.add sep
-    f.writeLine res 
-      
-      
+    f.writeLine res
 
 
-iterator get*(s: Sheet, str: SharedStrings): string = 
-  for item in s.data:
-    case item.kind
-    of sdk.SharedString:
-      yield str[parseInt(item.svalue)]
-    of sdk.Num:
-      yield item.nvalue 
-    else:
-      yield "not support"
+iterator getAlign*(s: Sheet, str: SharedStrings, sep=","): string =
+  let (rows, cols, _) = s.info
+  for i in 0 ..< rows:
+    var res = "|"
+    for j in 0 ..< cols:
+      let item = s.data[i * cols + j]
+      case item.kind
+      of sdk.SharedString:
+        res.add str[parseInt(item.svalue)]
+      of sdk.Num:
+        res.add item.nvalue
+      else:
+        raise
+      # if j < cols - 1:
+      #   res.add "|"
+    yield res
+
+iterator get*(s: Sheet, str: SharedStrings, sep="|"): string =
+  let (rows, cols, _) = s.info
+  for i in 0 ..< rows:
+    var res = "|"
+    for j in 0 ..< cols:
+      let item = s.data[i * cols + j]
+      case item.kind
+      of sdk.SharedString:
+        res.add alignLeft(str[parseInt(item.svalue)], 10)
+      of sdk.Num:
+        res.add alignLeft(item.nvalue, 10)
+      else:
+        raise
+      # if j < cols - 1:
+      #   res.add "|"
+      res.add sep
+    yield res
 
 when isMainModule:
   echo parseContentTypes("files/td/[Content_Types].xml")
   echo praseWorkBook("files/td/xl/workbook.xml")
   let str = parseSharedString("files/td/xl/sharedStrings.xml")
   let sheet = parseSheet("files/td/xl/worksheets/sheet1.xml")
-  for item in sheet.get(str):
+  echo repeat("-", 40)
+  for item in sheet.get(str, sep="|"):
     echo item
-  echo repeat("-", 40)
-  echo parsePos("A2", (3, 2, "A1"))
-  echo repeat("-", 40)
-  xlsxToCsv(sheet, str)
+
+  # echo repeat("-", 40)
+  # echo parsePos("A2", (3, 2, "A1"))
+  # echo repeat("-", 40)
+  xlsxToCsv(sheet, str, sep=" ")
