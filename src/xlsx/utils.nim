@@ -204,16 +204,6 @@ proc praseWorkBook*(fileName: string): WorkBook =
       # over
       break
 
-
-# b for boolean
-# d for date
-# e for error
-# inlineStr for an inline string (i.e., not stored in the shared strings part, but directly in the cell)
-# n for number
-# s for shared string (so stored in the shared strings part and not in the cell)
-# str for a formula (a string representing the formula)
-
-
 proc parseSheetDataBoolean(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.Boolean)
   # ignore <v>
@@ -265,12 +255,6 @@ proc parseSheetDataFormula(x: var XmlParser): SheetData {.inline.} =
   x.next()
   # point to </c>
 
-# <c r="C4" s="2" t="inlineStr">
-# <is>
-# <t>my string</t>
-# </is>
-# </c>
-
 proc parseSheetDataInlineStr(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.InlineStr)
   # ignore <is>
@@ -301,8 +285,8 @@ proc calculatePolynomial(a: string): int =
     # !Maybe raise alpha
     result = result * 27 + (ord(a[i]) - ord('A') + 1)
 
-# A1:B3
 proc parseDimension*(x: string): SheetInfo =
+  # A1:B3
   var
     rowLeft, rowRight: int
     colLeft, colRight: string
@@ -332,8 +316,7 @@ proc parsePos*(x: string, s: SheetInfo): int =
   col = calculatePolynomial(colRight) - calculatePolynomial(colLeft)
   result = row * s.cols + col
 
-
-proc dataKind(s: string): SheetDataKind {.inline.} =
+proc parseDataKind(s: string): SheetDataKind {.inline.} =
   # <c r="A2" t="s">
   ## convert string to SheetDataKind
   result = case s
@@ -365,7 +348,7 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
         pos = parsePos(x.attrValue, s)
       # catch key "t"
       elif x.attrKey =?= "t":
-        kind = dataKind(x.attrValue)
+        kind = parseDataKind(x.attrValue)
     of xmlElementClose, xmlEof:
       break
     else:
@@ -462,9 +445,6 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
     raise newException(XlsxError, "not support" & $kind)
   result = (pos, value)
 
-
-
-
 proc parseRowData*(x: var XmlParser, s: var Sheet) =
   while true:
     x.next()
@@ -479,8 +459,6 @@ proc parseRowData*(x: var XmlParser, s: var Sheet) =
       discard
   # ignore />
   x.next()
-
-
 
 proc parseSheet*(fileName: string): Sheet =
   # open xml file
@@ -555,7 +533,6 @@ proc xlsxToCsv(s: Sheet, str: SharedStrings, fileName = "test.csv", sep = ",") =
         res.add sep
     f.writeLine res
 
-
 iterator getAlign*(s: Sheet, str: SharedStrings, sep = ","): string =
   let (rows, cols, _) = s.info
   for i in 0 ..< rows:
@@ -604,6 +581,7 @@ proc parseExcel(fileName: string): SheetArray =
   #   echo item
   # echo plotSym(sheet.info.cols)
   # xlsxToCsv(sheet, sharedstring, sep = ", ")
+
 
 when isMainModule:
   import timeit
