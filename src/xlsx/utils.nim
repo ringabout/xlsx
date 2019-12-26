@@ -1,5 +1,5 @@
 import os, streams, parsexml, parseutils, tables, times, unicode
-import strutils except alignLeft 
+import strutils except alignLeft
 
 import zip / zipfiles
 
@@ -46,6 +46,9 @@ type
   Sheet* = object
     info: SheetInfo
     data: seq[SheetData]
+  SheetArray* = object
+    shape: tuple[rows: int, cols: int]
+    data: seq[string]
 
 
 proc extractXml*(fileName: string) =
@@ -534,7 +537,14 @@ proc parseSheet*(fileName: string): Sheet =
     else:
       discard
 
-# proc mapIndex()
+proc getKindString(item: SheetData, str: SharedStrings): string =
+  case item.kind
+  of sdk.SharedString:
+    result = str[parseInt(item.svalue)]
+  of sdk.Num:
+    result = item.nvalue
+  else:
+    result = ""
 
 proc xlsxToCsv(s: Sheet, str: SharedStrings, fileName = "test.csv", sep = ",") =
   let f = open(fileName, fmWrite)
@@ -544,57 +554,44 @@ proc xlsxToCsv(s: Sheet, str: SharedStrings, fileName = "test.csv", sep = ",") =
     var res = ""
     for j in 0 ..< cols:
       let item = s.data[i * cols + j]
-      case item.kind
-      of sdk.SharedString:
-        res.add str[parseInt(item.svalue)]
-      of sdk.Num:
-        res.add item.nvalue
-      else:
-        res.add " "
+      res.add getKindString(item, str)
       if j < cols - 1:
         res.add sep
     f.writeLine res
 
 
-iterator getAlign*(s: Sheet, str: SharedStrings, sep=","): string =
+iterator getAlign*(s: Sheet, str: SharedStrings, sep = ","): string =
   let (rows, cols, _) = s.info
   for i in 0 ..< rows:
     var res = "|"
     for j in 0 ..< cols:
       let item = s.data[i * cols + j]
-      case item.kind
-      of sdk.SharedString:
-        res.add str[parseInt(item.svalue)]
-      of sdk.Num:
-        res.add item.nvalue
-      else:
-        res.add " "
-      # if j < cols - 1:
-      #   res.add "|"
+      res.add getKindString(item, str)
     yield res
 
-proc plotSym(cols: int, width=10): string =
+proc plotSym(cols: int, width = 10): string =
   #+------------+------------+
   for i in 0 ..< cols:
     result.add "+"
     result.add repeat("-", width)
   result.add "+"
 
-iterator get*(s: Sheet, str: SharedStrings, sep="|", width=10): string =
+iterator get*(s: Sheet, str: SharedStrings, sep = "|", width = 10): string =
   let (rows, cols, _) = s.info
   for i in 0 ..< rows:
     var res = sep
     for j in 0 ..< cols:
       let item = s.data[i * cols + j]
-      case item.kind
-      of sdk.SharedString:
-        res.add alignLeft(str[parseInt(item.svalue)], width)
-      of sdk.Num:
-        res.add alignLeft(item.nvalue, width)
-      else:
-        res.add repeat(" ", width)
+      res.add alignLeft(getKindString(item, str), width)
       res.add sep
     yield res
+
+proc getSheetArray*(s: Sheet, str: SharedStrings): SheetArray =
+  let (rows, cols, _) = s.info
+  result.shape = (rows, cols)
+  result.data = newseq[string](rows * cols)
+  for idx, item in s.data:
+    result.data[idx] = getKindString(item, str)
 
 when isMainModule:
   echo parseContentTypes("files/td/[Content_Types].xml")
@@ -602,10 +599,19 @@ when isMainModule:
   let str = parseSharedString("files/td/xl/sharedStrings.xml")
   let sheet = parseSheet("files/td/xl/worksheets/sheet2.xml")
   echo plotSym(sheet.info.cols)
-  for item in sheet.get(str, sep="|"):
+  for item in sheet.get(str, sep = "|"):
     echo item
   echo plotSym(sheet.info.cols)
   # echo repeat("-", 40)
   # echo parsePos("A2", (3, 2, "A1"))
   # echo repeat("-", 40)
-  xlsxToCsv(sheet, str, sep=" ")
+  echo getSheetArray(sheet, str)
+  xlsxToCsv(sheet, str, sep = ",")
+  import parsecsv
+  var x: CsvParser
+  open(x, "test.csv")
+  while readRow(x):
+    echo "new row: "
+    for val in items(x.row):
+      echo "##", val, "##"
+  close(x)
