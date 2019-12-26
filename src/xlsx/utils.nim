@@ -7,8 +7,7 @@ import zip / zipfiles
 const
   UpperLetters = {'A' .. 'Z'}
   CharDataOption = {xmlCharData, xmlWhitespace}
-  fileName = "./test.xlsx"
-assert existsFile(fileName)
+let TempDir* = getTempDir() / "docx_windx_tmp"
 
 
 type
@@ -50,16 +49,14 @@ type
     shape: tuple[rows: int, cols: int]
     data: seq[string]
 
-
-proc extractXml*(fileName: string) =
+proc extractXml*(src: string, dest: string = TempDir) =
+  if not existsFile(src):
+    raise newException(IOError, "No such file: " & src)
   var z: ZipArchive
-  if not z.open(fileName):
-    echo "Opening zip failed"
-    quit(1)
-  z.extractAll("files/td")
+  if not z.open(src):
+    raise newException(IOError, "[ZIP] Can't open file: " & src)
+  z.extractAll(dest)
   z.close()
-  # assert existsDir("files/td/xl/worksheets")
-  # assert existsFile("files/td/xl/worksheets/sheet1.xml")
 
 template `=?=`(a, b: string): bool =
   cmpIgnoreCase(a, b) == 0
@@ -503,7 +500,6 @@ proc parseSheet*(fileName: string): Sheet =
         case x.kind
         of xmlAttribute:
           if x.attrKey =?= "ref":
-            echo x.attrValue
             result.info = parseDimension(x.attrValue)
             result.data = newSeq[SheetData](result.info.rows * result.info.cols)
         of xmlElementEnd:
@@ -586,32 +582,33 @@ iterator get*(s: Sheet, str: SharedStrings, sep = "|", width = 10): string =
       res.add sep
     yield res
 
-proc getSheetArray*(s: Sheet, str: SharedStrings): SheetArray =
+proc getSheetArray(s: Sheet, str: SharedStrings): SheetArray =
   let (rows, cols, _) = s.info
   result.shape = (rows, cols)
   result.data = newseq[string](rows * cols)
   for idx, item in s.data:
     result.data[idx] = getKindString(item, str)
 
+proc parseExcel(fileName: string): SheetArray =
+  extractXml(fileName)
+  defer: removeDir(TempDir)
+  let 
+    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
+    workbook = praseWorkBook(TempDir / "xl/workbook.xml")
+    sharedstring = parseSharedString("files/td/xl/sharedStrings.xml")
+    sheet = parseSheet("files/td/xl/worksheets/sheet2.xml")
+
+  result = getSheetArray(sheet, sharedstring)
+  # echo plotSym(sheet.info.cols)
+  # for item in sheet.get(sharedstring, sep = "|"):
+  #   echo item
+  # echo plotSym(sheet.info.cols)
+  # xlsxToCsv(sheet, sharedstring, sep = ", ")
+
 when isMainModule:
-  echo parseContentTypes("files/td/[Content_Types].xml")
-  echo praseWorkBook("files/td/xl/workbook.xml")
-  let str = parseSharedString("files/td/xl/sharedStrings.xml")
-  let sheet = parseSheet("files/td/xl/worksheets/sheet2.xml")
-  echo plotSym(sheet.info.cols)
-  for item in sheet.get(str, sep = "|"):
-    echo item
-  echo plotSym(sheet.info.cols)
+  import timeit
+  timeOnce("test"):
+    echo parseExcel("./test.xlsx")
   # echo repeat("-", 40)
   # echo parsePos("A2", (3, 2, "A1"))
   # echo repeat("-", 40)
-  echo getSheetArray(sheet, str)
-  xlsxToCsv(sheet, str, sep = ",")
-  import parsecsv
-  var x: CsvParser
-  open(x, "test.csv")
-  while readRow(x):
-    echo "new row: "
-    for val in items(x.row):
-      echo "##", val, "##"
-  close(x)
