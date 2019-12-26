@@ -54,8 +54,8 @@ proc extractXml*(fileName: string) =
     quit(1)
   z.extractAll("files/td")
   z.close()
-  assert existsDir("files/td/xl/worksheets")
-  assert existsFile("files/td/xl/worksheets/sheet1.xml")
+  # assert existsDir("files/td/xl/worksheets")
+  # assert existsFile("files/td/xl/worksheets/sheet1.xml")
 
 template `=?=`(a, b: string): bool =
   cmpIgnoreCase(a, b) == 0
@@ -536,7 +536,31 @@ proc parseSheet*(fileName: string): Sheet =
     else:
       discard
 
-iterator get*(s: Sheet, str: SharedStrings): string =
+# proc mapIndex()
+
+proc xlsxToCsv(s: Sheet, str: SharedStrings, fileName = "test.csv", sep = ",") =
+  let f = open(fileName, fmWrite)
+  defer: f.close()
+  let (rows, cols, _) = s.info
+  for i in 0 ..< rows:
+    var res = ""
+    for j in 0 ..< cols:
+      let item = s.data[i * cols + j] 
+      case item.kind
+      of sdk.SharedString:
+        res.add str[parseInt(item.svalue)] 
+      of sdk.Num:
+        res.add item.nvalue 
+      else:
+        raise
+      if j < cols - 1:
+        res.add sep
+    f.writeLine res 
+      
+      
+
+
+iterator get*(s: Sheet, str: SharedStrings): string = 
   for item in s.data:
     case item.kind
     of sdk.SharedString:
@@ -556,3 +580,4 @@ when isMainModule:
   echo repeat("-", 40)
   echo parsePos("A2", (3, 2, "A1"))
   echo repeat("-", 40)
+  xlsxToCsv(sheet, str)
