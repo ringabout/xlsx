@@ -1,4 +1,5 @@
-import os, streams, parsexml, parseutils, strutils, tables, times
+import os, streams, parsexml, parseutils, tables, times, unicode
+import strutils except alignLeft 
 
 import zip / zipfiles
 
@@ -459,9 +460,6 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
         discard
   else:
     raise newException(XlsxError, "not support" & $kind)
-
-
-
   result = (pos, value)
 
 
@@ -552,7 +550,7 @@ proc xlsxToCsv(s: Sheet, str: SharedStrings, fileName = "test.csv", sep = ",") =
       of sdk.Num:
         res.add item.nvalue
       else:
-        raise
+        res.add " "
       if j < cols - 1:
         res.add sep
     f.writeLine res
@@ -570,26 +568,31 @@ iterator getAlign*(s: Sheet, str: SharedStrings, sep=","): string =
       of sdk.Num:
         res.add item.nvalue
       else:
-        raise
+        res.add " "
       # if j < cols - 1:
       #   res.add "|"
     yield res
 
-iterator get*(s: Sheet, str: SharedStrings, sep="|"): string =
+proc plotSym(cols: int, width=10): string =
+  #+------------+------------+
+  for i in 0 ..< cols:
+    result.add "+"
+    result.add repeat("-", width)
+  result.add "+"
+
+iterator get*(s: Sheet, str: SharedStrings, sep="|", width=10): string =
   let (rows, cols, _) = s.info
   for i in 0 ..< rows:
-    var res = "|"
+    var res = sep
     for j in 0 ..< cols:
       let item = s.data[i * cols + j]
       case item.kind
       of sdk.SharedString:
-        res.add alignLeft(str[parseInt(item.svalue)], 10)
+        res.add alignLeft(str[parseInt(item.svalue)], width)
       of sdk.Num:
-        res.add alignLeft(item.nvalue, 10)
+        res.add alignLeft(item.nvalue, width)
       else:
-        raise
-      # if j < cols - 1:
-      #   res.add "|"
+        res.add repeat(" ", width)
       res.add sep
     yield res
 
@@ -597,11 +600,11 @@ when isMainModule:
   echo parseContentTypes("files/td/[Content_Types].xml")
   echo praseWorkBook("files/td/xl/workbook.xml")
   let str = parseSharedString("files/td/xl/sharedStrings.xml")
-  let sheet = parseSheet("files/td/xl/worksheets/sheet1.xml")
-  echo repeat("-", 40)
+  let sheet = parseSheet("files/td/xl/worksheets/sheet2.xml")
+  echo plotSym(sheet.info.cols)
   for item in sheet.get(str, sep="|"):
     echo item
-
+  echo plotSym(sheet.info.cols)
   # echo repeat("-", 40)
   # echo parsePos("A2", (3, 2, "A1"))
   # echo repeat("-", 40)
