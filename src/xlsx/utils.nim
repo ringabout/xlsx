@@ -536,13 +536,23 @@ proc parseSheet*(fileName: string): Sheet =
     else:
       discard
 
-
+iterator get*(s: Sheet, str: SharedStrings): string =
+  for item in s.data:
+    case item.kind
+    of sdk.SharedString:
+      yield str[parseInt(item.svalue)]
+    of sdk.Num:
+      yield item.nvalue 
+    else:
+      yield "not support"
 
 when isMainModule:
   echo parseContentTypes("files/td/[Content_Types].xml")
   echo praseWorkBook("files/td/xl/workbook.xml")
-  echo parseSharedString("files/td/xl/sharedStrings.xml")
-  echo parseSheet("files/td/xl/worksheets/sheet1.xml")
+  let str = parseSharedString("files/td/xl/sharedStrings.xml")
+  let sheet = parseSheet("files/td/xl/worksheets/sheet1.xml")
+  for item in sheet.get(str):
+    echo item
   echo repeat("-", 40)
   echo parsePos("A2", (3, 2, "A1"))
   echo repeat("-", 40)
