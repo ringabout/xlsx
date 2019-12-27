@@ -565,8 +565,8 @@ proc parseExcel*(fileName: string): SheetArray =
   # extractXml(fileName)
   # defer: removeDir(TempDir)
   let 
-    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
-    workbook = praseWorkBook(TempDir / "xl/workbook.xml")
+    # contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
+    # workbook = praseWorkBook(TempDir / "xl/workbook.xml")
     sharedstring = parseSharedString(TempDir / "xl/sharedStrings.xml")
     sheet = parseSheet(TempDir / "xl/worksheets/sheet2.xml")
 

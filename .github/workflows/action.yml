@@ -30,15 +30,6 @@ jobs:
     - name: Test command
       run: nimble test
 
-  test_v1:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - uses: jiro4989/setup-nim-action@v1.0.1
-    - name: Install xlsx
-      run: nimble install https://github.com/xflywind/xlsx -y
-    - name: Test command
-      run: nimble test
 
   test_version:
     runs-on: ubuntu-latest
@@ -47,6 +38,7 @@ jobs:
         version:
           - 1.0.2
           - stable
+          - devel
     steps:
     - uses: actions/checkout@v1
     - uses: jiro4989/setup-nim-action@v1.0.1
