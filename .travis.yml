@@ -28,11 +28,11 @@ matrix:
     - os: osx
   fast_finish: true
 
-## BEGIN: Assuming you rely on external dependencies
-# addons: # This will only be executed on Linux
-#   apt:
-#     packages:
-#       - libyourdependency
+# BEGIN: Assuming you rely on external dependencies
+addons: # This will only be executed on Linux
+  apt:
+    packages:
+      - libzip-dev
 
 # before_install:
 #   # If you want to install an OSX Homebrew dependency
