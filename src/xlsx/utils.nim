@@ -43,11 +43,11 @@ type
     rows, cols: int
     start: string
   Sheet* = object
-    info: SheetInfo
-    data: seq[SheetData]
+    info*: SheetInfo
+    data*: seq[SheetData]
   SheetArray* = object
-    shape: tuple[rows: int, cols: int]
-    data: seq[string]
+    shape*: tuple[rows: int, cols: int]
+    data*: seq[string]
 
 proc extractXml*(src: string, dest: string = TempDir) =
   if not existsFile(src):
@@ -212,8 +212,8 @@ proc parseSheetDataBoolean(x: var XmlParser): SheetData {.inline.} =
     result.bvalue &= x.charData
     x.next()
   # ignore </v>
-  x.next()
-  # point to </c>
+  # x.next()
+  # # point to </c>
 
 proc parseSheetDataNum(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.Num)
@@ -223,8 +223,8 @@ proc parseSheetDataNum(x: var XmlParser): SheetData {.inline.} =
     result.nvalue &= x.charData
     x.next()
   # ignore </v>
-  x.next()
-  # point to </c>
+  # x.next()
+  # # point to </c>
 
 proc parseSheetDataSharedString(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.SharedString)
@@ -234,8 +234,8 @@ proc parseSheetDataSharedString(x: var XmlParser): SheetData {.inline.} =
     result.svalue &= x.charData
     x.next()
   # ignore </v>
-  x.next()
-  # point to </c>
+  # x.next()
+  # # point to </c>
 
 proc parseSheetDataFormula(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.Formula)
@@ -252,8 +252,8 @@ proc parseSheetDataFormula(x: var XmlParser): SheetData {.inline.} =
     result.fnvalue &= x.charData
     x.next()
   # ignore </v>
-  x.next()
-  # point to </c>
+  # x.next()
+  # # point to </c>
 
 proc parseSheetDataInlineStr(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.InlineStr)
@@ -266,8 +266,8 @@ proc parseSheetDataInlineStr(x: var XmlParser): SheetData {.inline.} =
   # ignore </t>
   x.next()
   # ignore </is>
-  x.next()
-  # point to </c>s
+  # x.next()
+  # # point to </c>
 
 proc parseSheetDate(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.Date)
@@ -277,8 +277,8 @@ proc parseSheetDate(x: var XmlParser): SheetData {.inline.} =
     result.nvalue &= x.charData
     x.next()
   # ignore </v>
-  x.next()
-  # point to </c>
+  # x.next()
+  # # point to </c>
 
 proc calculatePolynomial(a: string): int =
   for i in 0 .. a.high:
@@ -491,8 +491,8 @@ proc parseSheet*(fileName: string): Sheet =
     of xmlElementStart:
       if x.elementName =?= "sheetData":
         # ignore <sheetData>
-        x.next()
         while true:
+          x.next()
           case x.kind
           of xmlElementOpen:
             if x.elementName =?= "row":
@@ -501,7 +501,6 @@ proc parseSheet*(fileName: string): Sheet =
             break
           else:
             discard
-          x.next()
     of xmlEof:
       break
     else:
@@ -562,17 +561,16 @@ proc getSheetArray(s: Sheet, str: SharedStrings): SheetArray =
   for idx, item in s.data:
     result.data[idx] = getKindString(item, str)
 
-proc parseExcel(fileName: string): SheetArray =
-  extractXml(fileName)
-  defer: removeDir(TempDir)
+proc parseExcel*(fileName: string): SheetArray =
+  # extractXml(fileName)
+  # defer: removeDir(TempDir)
   let 
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = praseWorkBook(TempDir / "xl/workbook.xml")
-    sharedstring = parseSharedString("files/td/xl/sharedStrings.xml")
-    sheet = parseSheet("files/td/xl/worksheets/sheet2.xml")
+    sharedstring = parseSharedString(TempDir / "xl/sharedStrings.xml")
+    sheet = parseSheet(TempDir / "xl/worksheets/sheet2.xml")
 
   result = getSheetArray(sheet, sharedstring)
-
 
 proc `$`*(s: SheetArray): string =
   let 
@@ -601,10 +599,4 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") =
     f.writeLine res
 
 
-when isMainModule:
-  let data = parseExcel("./test.xlsx")
-  echo data
-  data.toCsv("t2.csv")
-  # echo repeat("-", 40)
-  # echo parsePos("A2", (3, 2, "A1"))
-  # echo repeat("-", 40)
+

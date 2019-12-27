@@ -7,6 +7,4 @@
 
 import unittest
 
-import xlsx
-test "can add":
-  check add(5, 5) == 10
+import test_excel
