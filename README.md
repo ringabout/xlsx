@@ -9,8 +9,10 @@ Parse Excel without header.
 import xlsx
 
 
-let data = parseExcel("tests/test.xlsx")
-echo data
+let 
+  data = parseExcel("tests/test.xlsx")
+  sheetName = "Sheet2"
+echo data[sheetName]
 ```
 
 output:
@@ -29,8 +31,10 @@ Parse Excel with header.
 import xlsx
 
 
-let data = parseExcel("tests/test.xlsx", header = true)
-echo data
+let 
+  data = parseExcel("tests/test.xlsx", header = true)
+  sheetName = "Sheet2"
+echo data[sheetName]
 ```
 
 output:
@@ -50,8 +54,10 @@ Parse Excel and skip header for data processing.
 import xlsx
 
 
-let data = parseExcel("tests/test.xlsx", skipHeader = true)
-echo data
+let 
+  data = parseExcel("tests/test.xlsx", skipHeader = true)
+  sheetName = "Sheet2"
+echo data[sheetName]
 ```
 
 output:
