@@ -48,6 +48,7 @@ type
   SheetArray* = object
     shape*: tuple[rows: int, cols: int]
     data*: seq[string]
+    header*: bool
 
 proc extractXml*(src: string, dest: string = TempDir) =
   if not existsFile(src):
@@ -542,7 +543,7 @@ proc plotSym(cols: int, width = 10): string =
   for i in 0 ..< cols:
     result.add "+"
     result.add repeat("-", width)
-  result.add "+"
+  result.add "+\n"
 
 iterator get*(s: Sheet, str: SharedStrings, sep = "|", width = 10): string =
   let (rows, cols, _) = s.info
@@ -554,14 +555,30 @@ iterator get*(s: Sheet, str: SharedStrings, sep = "|", width = 10): string =
       res.add sep
     yield res
 
-proc getSheetArray(s: Sheet, str: SharedStrings): SheetArray =
+proc getSheetArray(s: Sheet, str: SharedStrings, header: bool, skipHeader: bool): SheetArray =
   let (rows, cols, _) = s.info
   result.shape = (rows, cols)
-  result.data = newseq[string](rows * cols)
-  for idx, item in s.data:
-    result.data[idx] = getKindString(item, str)
-
-proc parseExcel*(fileName: string): SheetArray =
+  result.header = header
+  # ignore header
+  if skipHeader:
+    dec(result.shape.rows)
+  result.data = newseq[string](result.shape.rows * cols)
+  if likely(not skipHeader):
+    for idx, item in s.data:
+      result.data[idx] = getKindString(item, str)
+  else:
+    var 
+      skipCount = cols
+      pos = 0
+    for item in s.data:
+      if skipCount > 0:
+        dec(skipCount)
+        continue
+      result.data[pos] = getKindString(item, str)
+      inc(pos)
+    result.data = result.data
+  
+proc parseExcel*(fileName: string, header=false, skipHeader=false): SheetArray =
   extractXml(fileName)
   defer: removeDir(TempDir)
   let
@@ -570,13 +587,14 @@ proc parseExcel*(fileName: string): SheetArray =
     sharedstring = parseSharedString(TempDir / "xl/sharedStrings.xml")
     sheet = parseSheet(TempDir / "xl/worksheets/sheet2.xml")
 
-  result = getSheetArray(sheet, sharedstring)
+  result = getSheetArray(sheet, sharedstring, header, skipHeader)
 
 proc `$`*(s: SheetArray): string =
   let
     (rows, cols) = s.shape
     width = 10
-  result.add plotSym(cols) & "\n"
+  var header = s.header
+  result.add plotSym(cols)
   for i in 0 ..< rows:
     var res = "|"
     for j in 0 ..< cols:
@@ -584,7 +602,10 @@ proc `$`*(s: SheetArray): string =
       res.add alignLeft(item, width)
       res.add "|"
     result.add res & "\n"
-  result.add plotSym(cols) & "\n"
+    if header:
+      result.add plotSym(cols) 
+      header = false
+  result.add plotSym(cols)
 
 proc toCsv*(s: SheetArray, dest: string, sep = ",") =
   let f = open(dest, fmWrite)
