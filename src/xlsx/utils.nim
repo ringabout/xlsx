@@ -49,6 +49,7 @@ type
     shape*: tuple[rows: int, cols: int]
     data*: seq[string]
     header*: bool
+    colType*: seq[SheetDataKind]
   SheetTable* = Table[string, SheetArray]
 
 # proc `==`*(self, other: SheetArray): bool =
@@ -76,8 +77,8 @@ proc parseContentTypes*(fileName: string): ContentTypes =
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
   var x: XmlParser
-  defer: x.close()
   open(x, s, fileName)
+  defer: x.close()
 
   while true:
     x.next()
@@ -142,8 +143,8 @@ proc parseSharedString*(fileName: string): SharedStrings =
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
   var x: XmlParser
-  defer: x.close()
   open(x, s, fileName, {reportWhitespace})
+  defer: x.close()
 
   while true:
     x.next()
@@ -177,8 +178,8 @@ proc praseWorkBook*(fileName: string): WorkBook =
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
   var x: XmlParser
-  defer: x.close()
   open(x, s, fileName)
+  defer: x.close()
 
   var name: string
   while true:
@@ -520,10 +521,16 @@ proc getKindString(item: SheetData, str: SharedStrings): string =
     result = str[parseInt(item.svalue)]
   of sdk.Num:
     result = item.nvalue
+  of sdk.InlineStr:
+    result = item.isvalue
+  of sdk.Date:
+    result = item.dvalue
+  of sdk.Formula:
+    result = item.fnvalue
   else:
     result = ""
 
-proc xlsxToCsv(s: Sheet, str: SharedStrings, fileName = "test.csv", sep = ",") =
+proc xlsxToCsv*(s: Sheet, str: SharedStrings, fileName = "test.csv", sep = ",") =
   let f = open(fileName, fmWrite)
   defer: f.close()
   let (rows, cols, _) = s.info
@@ -571,17 +578,43 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
   if skipHeader:
     dec(result.shape.rows)
   result.data = newseq[string](result.shape.rows * cols)
+  result.colType = newSeq[SheetDataKind](cols)
   if likely(not skipHeader):
+    var 
+      start: int
+      over: int
+      skipCount: int
+    if result.header:
+      start = cols
+      skipCount = cols
+      over = min(2 * cols, result.data.len)
+    else:
+      start = 0
+      over = min(cols, result.data.len)
     for idx, item in s.data:
+      if header:
+        if skipCount == 0 and start < over:
+          result.colType[start - cols] = item.kind
+          inc(start)
+        if skipCount > 0:
+          dec(skipCount)
+      else:
+        if start < over:
+          result.colType[start] = item.kind
+          inc(start)
       result.data[idx] = getKindString(item, str)
   else:
     var
       skipCount = cols
-      pos = 0
+      pos, skipType = 0
     for item in s.data:
       if skipCount > 0:
         dec(skipCount)
         continue
+      if skipType < cols:
+        # may lose some types because of missings of first row
+        result.colType[skipType] = item.kind
+        inc(skipType)
       result.data[pos] = getKindString(item, str)
       inc(pos)
     result.data = result.data
@@ -591,7 +624,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   extractXml(fileName)
   defer: removeDir(TempDir)
   let
-    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
+    # contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = praseWorkBook(TempDir / "xl/workbook.xml")
     sharedstring = parseSharedString(TempDir / "xl/sharedStrings.xml")
 
@@ -604,8 +637,9 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   if sheetName notin workbook:
     raise newException(XlsxError, "no such sheet name: " & sheetName)
 
-  let value = workbook[sheetName]
-  let sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
+  let 
+    value = workbook[sheetName]
+    sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
   result[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeader)
 
 
@@ -641,8 +675,9 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") =
 
 when isMainModule:
   let
-    sheetName = "sheet2"
-    excel = "../../tests/nim.xlsx"
-    data = parseExcel(excel)
-  for item in data.values:
-    echo item.shape
+    sheetName = "Sheet2"
+    excel = "../../tests/test.xlsx"
+    data = parseExcel(excel, sheetName = sheetName, header=true, skipHeader=false)
+
+  echo data[sheetName].colType
+
