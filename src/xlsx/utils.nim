@@ -1,4 +1,4 @@
-import os, streams, parsexml, parseutils, tables, times, unicode
+import os, streams, parsexml, parseutils, tables, times, unicode, strformat
 import strutils except alignLeft
 
 import zip / zipfiles
@@ -49,6 +49,12 @@ type
     shape*: tuple[rows: int, cols: int]
     data*: seq[string]
     header*: bool
+  SheetTable* = Table[string, SheetArray]
+
+# proc `==`*(self, other: SheetArray): bool =
+#   result = self.shape == other.shape and
+#            self.data == other.data and
+#            self.header == other.header
 
 proc extractXml*(src: string, dest: string = TempDir) =
   if not existsFile(src):
@@ -439,7 +445,8 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
       else:
         discard
   else:
-    raise newException(XlsxError, "not support" & $kind)
+    value = SheetData(kind: sdk.Error, error: "error")
+    # raise newException(XlsxError, "not support " & $kind)
   result = (pos, value)
 
 proc parseRowData*(x: var XmlParser, s: var Sheet) =
@@ -579,17 +586,28 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
       inc(pos)
     result.data = result.data
 
-proc parseExcel*(fileName: string, header = false,
-    skipHeader = false): SheetArray =
+proc parseExcel*(fileName: string, sheetName = "", header = false,
+    skipHeader = false): SheetTable =
   extractXml(fileName)
   defer: removeDir(TempDir)
   let
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = praseWorkBook(TempDir / "xl/workbook.xml")
     sharedstring = parseSharedString(TempDir / "xl/sharedStrings.xml")
-    sheet = parseSheet(TempDir / "xl/worksheets/sheet2.xml")
 
-  result = getSheetArray(sheet, sharedstring, header, skipHeader)
+  if sheetName == "":
+    for key, value in workbook.pairs:
+      let sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
+      result[key] = getSheetArray(sheet, sharedstring, header, skipHeader)
+    return
+
+  if sheetName notin workbook:
+    raise newException(XlsxError, "no such sheet name: " & sheetName)
+
+  let value = workbook[sheetName]
+  let sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
+  result[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeader)
+
 
 proc `$`*(s: SheetArray): string =
   let
@@ -601,7 +619,7 @@ proc `$`*(s: SheetArray): string =
     var res = "|"
     for j in 0 ..< cols:
       let item = s.data[i * cols + j]
-      res.add alignLeft(item, width)
+      res.add alignLeft(item[0 ..< min(width, item.len)], width)
       res.add "|"
     result.add res & "\n"
     if header:
@@ -623,6 +641,8 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") =
 
 when isMainModule:
   let
-    excel = "../../tests/test.xlsx"
-    data = parseExcel(excel, skipHeader=true)
-  echo data
+    sheetName = "sheet2"
+    excel = "../../tests/nim.xlsx"
+    data = parseExcel(excel)
+  for item in data.values:
+    echo item.shape
