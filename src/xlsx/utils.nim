@@ -555,7 +555,8 @@ iterator get*(s: Sheet, str: SharedStrings, sep = "|", width = 10): string =
       res.add sep
     yield res
 
-proc getSheetArray(s: Sheet, str: SharedStrings, header: bool, skipHeader: bool): SheetArray =
+proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
+    skipHeader: bool): SheetArray =
   let (rows, cols, _) = s.info
   result.shape = (rows, cols)
   result.header = header
@@ -567,7 +568,7 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool, skipHeader: bool)
     for idx, item in s.data:
       result.data[idx] = getKindString(item, str)
   else:
-    var 
+    var
       skipCount = cols
       pos = 0
     for item in s.data:
@@ -577,8 +578,9 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool, skipHeader: bool)
       result.data[pos] = getKindString(item, str)
       inc(pos)
     result.data = result.data
-  
-proc parseExcel*(fileName: string, header=false, skipHeader=false): SheetArray =
+
+proc parseExcel*(fileName: string, header = false,
+    skipHeader = false): SheetArray =
   extractXml(fileName)
   defer: removeDir(TempDir)
   let
@@ -603,7 +605,7 @@ proc `$`*(s: SheetArray): string =
       res.add "|"
     result.add res & "\n"
     if header:
-      result.add plotSym(cols) 
+      result.add plotSym(cols)
       header = false
   result.add plotSym(cols)
 
@@ -620,7 +622,7 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") =
     f.writeLine res
 
 when isMainModule:
-  let 
+  let
     excel = "../../tests/test.xlsx"
-    data = parseExcel(excel)
+    data = parseExcel(excel, skipHeader=true)
   echo data
