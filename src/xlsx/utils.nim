@@ -564,7 +564,7 @@ proc getSheetArray(s: Sheet, str: SharedStrings): SheetArray =
 proc parseExcel*(fileName: string): SheetArray =
   extractXml(fileName)
   defer: removeDir(TempDir)
-  let 
+  let
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = praseWorkBook(TempDir / "xl/workbook.xml")
     sharedstring = parseSharedString(TempDir / "xl/sharedStrings.xml")
@@ -573,7 +573,7 @@ proc parseExcel*(fileName: string): SheetArray =
   result = getSheetArray(sheet, sharedstring)
 
 proc `$`*(s: SheetArray): string =
-  let 
+  let
     (rows, cols) = s.shape
     width = 10
   result.add plotSym(cols) & "\n"
@@ -598,5 +598,8 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") =
         res.add sep
     f.writeLine res
 
-
-
+when isMainModule:
+  let 
+    excel = "../../tests/test.xlsx"
+    data = parseExcel(excel)
+  echo data
