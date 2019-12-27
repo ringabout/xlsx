@@ -68,3 +68,22 @@ output:
 |tom       |87        |34        |
 +----------+----------+----------+
 ```
+
+convert to csv
+
+```nim
+import xlsx
+
+
+let sheetName = "Sheet2"
+let data = parseExcel("tests/test.xlsx")
+data[sheetName].toCsv("test.csv", sep = ",")
+```
+
+output:
+
+```text
+name,grade,age
+simon,,14
+tom,87,34
+```
