@@ -1,5 +1,4 @@
-import os, streams, parsexml, parseutils, tables, times, unicode, strformat
-import strutils except alignLeft
+import os, streams, parsexml, parseutils, tables, times, strformat, strutils
 
 import zip / zipfiles
 
@@ -11,7 +10,6 @@ let TempDir* = getTempDir() / "docx_windx_tmp"
 
 
 type
-  # newException(SheetDataKindError, "unKnown sheet data kind")
   XlsxError* = object of Exception
   SheetDataKindError* = object of XlsxError
   SheetDataKind* {.pure.} = enum
@@ -52,12 +50,8 @@ type
     colType*: seq[SheetDataKind]
   SheetTable* = Table[string, SheetArray]
 
-# proc `==`*(self, other: SheetArray): bool =
-#   result = self.shape == other.shape and
-#            self.data == other.data and
-#            self.header == other.header
 
-proc extractXml*(src: string, dest: string = TempDir) =
+proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
   if not existsFile(src):
     raise newException(IOError, "No such file: " & src)
   var z: ZipArchive
@@ -72,7 +66,7 @@ template `=?=`(a, b: string): bool =
 proc matchKindName(x: XmlParser, kind: XmlEventKind, name: string): bool {.inline.} =
   x.kind == kind and x.elementName =?= name
 
-proc parseContentTypes*(fileName: string): ContentTypes =
+proc parseContentTypes(fileName: string): ContentTypes {.used.} =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
@@ -87,9 +81,9 @@ proc parseContentTypes*(fileName: string): ContentTypes =
       # catch <Override
       if x.elementName =?= "Override":
         # ignore xmlElementOpen with name "Override"
-        x.next()
         # maybe many attrs
         while true:
+          x.next()
           case x.kind
           of xmlAttribute:
             # match attr PartName
@@ -97,8 +91,8 @@ proc parseContentTypes*(fileName: string): ContentTypes =
               result.add x.attrValue
           of xmlElementEnd:
             break
-          else: discard
-          x.next()
+          else:
+            discard
     of xmlElementEnd:
       discard
     of xmlEof:
@@ -112,10 +106,10 @@ proc parseStringTable*(x: var XmlParser, res: var seq[string]) =
     # match <si>
     if x.matchKindName(xmlElementStart, "si"):
       # ignore <si>
-      x.next()
       # match attrs in <si>
       # maybe <t> , <phoneticPr and so on.
       while true:
+        x.next()
         # macth <t>
         if x.matchKindName(xmlElementStart, "t"):
           # ignore <t>
@@ -131,7 +125,6 @@ proc parseStringTable*(x: var XmlParser, res: var seq[string]) =
         else:
           discard
         # switch to the next element
-        x.next()
     elif x.kind == xmlEof: # end the world
       break
     else:
@@ -515,8 +508,10 @@ proc parseSheet*(fileName: string): Sheet =
     else:
       discard
 
-proc getKindString(item: SheetData, str: SharedStrings): string =
+proc getKindString(item: SheetData, str: SharedStrings): string {.inline.} =
   case item.kind
+  of sdk.Boolean:
+    result = item.bvalue
   of sdk.SharedString:
     result = str[parseInt(item.svalue)]
   of sdk.Num:
@@ -530,7 +525,8 @@ proc getKindString(item: SheetData, str: SharedStrings): string =
   else:
     result = ""
 
-proc xlsxToCsv*(s: Sheet, str: SharedStrings, fileName = "test.csv", sep = ",") =
+proc xlsxToCsv(s: Sheet, str: SharedStrings, fileName = "test.csv",
+    sep = ",") {.used.} =
   let f = open(fileName, fmWrite)
   defer: f.close()
   let (rows, cols, _) = s.info
@@ -543,7 +539,7 @@ proc xlsxToCsv*(s: Sheet, str: SharedStrings, fileName = "test.csv", sep = ",") 
         res.add sep
     f.writeLine res
 
-iterator getAlign*(s: Sheet, str: SharedStrings, sep = ","): string =
+iterator getAlign(s: Sheet, str: SharedStrings, sep = ","): string {.used.} =
   let (rows, cols, _) = s.info
   for i in 0 ..< rows:
     var res = "|"
@@ -552,7 +548,7 @@ iterator getAlign*(s: Sheet, str: SharedStrings, sep = ","): string =
       res.add getKindString(item, str)
     yield res
 
-proc plotSym(cols: int, width = 10): string =
+proc plotSym(cols: int, width = 10): string {.inline.} =
   #+------------+------------+
   for i in 0 ..< cols:
     result.add "+"
@@ -580,7 +576,7 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
   result.data = newseq[string](result.shape.rows * cols)
   result.colType = newSeq[SheetDataKind](cols)
   if likely(not skipHeader):
-    var 
+    var
       start: int
       over: int
       skipCount: int
@@ -627,7 +623,6 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     # contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = praseWorkBook(TempDir / "xl/workbook.xml")
     sharedstring = parseSharedString(TempDir / "xl/sharedStrings.xml")
-
   if sheetName == "":
     for key, value in workbook.pairs:
       let sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
@@ -637,7 +632,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   if sheetName notin workbook:
     raise newException(XlsxError, "no such sheet name: " & sheetName)
 
-  let 
+  let
     value = workbook[sheetName]
     sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
   result[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeader)
@@ -661,7 +656,7 @@ proc `$`*(s: SheetArray): string =
       header = false
   result.add plotSym(cols)
 
-proc toCsv*(s: SheetArray, dest: string, sep = ",") =
+proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
   let f = open(dest, fmWrite)
   defer: f.close()
   let (rows, cols) = s.shape
@@ -675,9 +670,10 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") =
 
 when isMainModule:
   let
-    sheetName = "Sheet2"
-    excel = "../../tests/test.xlsx"
-    data = parseExcel(excel, sheetName = sheetName, header=true, skipHeader=false)
+    sheetName = "sheet2"
+    excel = "../../tests/nim.xlsx"
+    data = parseExcel(excel, sheetName = sheetName, header = true,
+        skipHeader = false)
 
   echo data[sheetName].colType
 
