@@ -8,13 +8,13 @@ suite "test parse Excel":
 
   test "parse Excel":
     let data = parseExcel("tests/test.xlsx")
-    check(data[sheetName] == SheetArray(shape: (3, 3), data: @["name", "grade", "age",
-        "simon", "", "14", "tom", "87", "34"]))
+    check(data[sheetName].data == @["name", "grade", "age",
+        "simon", "", "14", "tom", "87", "34"])
 
   test "skip header":
     let data = parseExcel("tests/test.xlsx", skipHeader = true)
-    check(data[sheetName] == SheetArray(shape: (2, 3), data: @["simon", "", "14", "tom",
-        "87", "34"]))
+    check(data[sheetName].data == @["simon", "", "14", "tom",
+        "87", "34"])
 
   test "toCsv":
     let data = parseExcel("tests/test.xlsx")
