@@ -2,7 +2,7 @@
 
 version       = "0.1.0"
 author        = "flywind"
-description   = "A new awesome nimble package"
+description   = "Read and parse Excel files"
 license       = "MIT"
 srcDir        = "src"
 
