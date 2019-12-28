@@ -98,7 +98,7 @@ import xlsx
 
 let sheetName = "Sheet2"
 let data = parseExcel("tests/test.xlsx")
-let rows = data[sheetName].toSeq()
+let rows = data[sheetName].toSeq(false)
 for row in rows:
   echo row
 ```
