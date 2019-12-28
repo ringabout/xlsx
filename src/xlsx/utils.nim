@@ -691,7 +691,7 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
         res.add sep
     f.writeLine res
 
-proc toSeq*(s: SheetArray, skipHeaders = true): seq[seq[string]] = # <-- HERE
+proc toSeq*(s: SheetArray, skipHeaders = false): seq[seq[string]] = # <-- HERE
   ## Parse SheetArray and return a seq[seq[string]]
   let
     sheet = s.data
