@@ -614,6 +614,8 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
       result.data[pos] = getKindString(item, str)
       inc(pos)
     result.data = result.data
+    # if skip header, header should be false
+    result.header = false
 
 proc parseExcel*(fileName: string, sheetName = "", header = false,
     skipHeader = false): SheetTable =
@@ -671,7 +673,7 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
 when isMainModule:
   let
     sheetName = "sheet2"
-    excel = "../../tests/nim.xlsx"
+    excel = "../../tests/test.xlsx"
     data = parseExcel(excel, sheetName = sheetName, header = true,
         skipHeader = false)
 
