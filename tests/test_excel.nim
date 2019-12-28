@@ -18,5 +18,5 @@ suite "test parse Excel":
 
   test "toCsv":
     let data = parseExcel("tests/test.xlsx")
-    data[sheetName].toCsv("test.csv")
+    data[sheetName].toCsv("tests/test.csv")
 
