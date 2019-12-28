@@ -1,6 +1,9 @@
 name: Test xlsx
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   test:
@@ -47,4 +50,24 @@ jobs:
       run: nimble install https://github.com/xflywind/xlsx -y
     - name: Test command
       run: nimble test
+
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: jiro4989/setup-nim-action@v1.0.1
+      with:
+        nim-version: stable
+        
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Build and Deploy
+      uses: JamesIves/github-pages-deploy-action@master
+      env:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BRANCH: master
+        FOLDER: docs
+        BUILD_SCRIPT: nim doc -o:docs/xlsx.html src/xlsx/utils.nim
 

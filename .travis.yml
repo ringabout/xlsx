@@ -51,4 +51,4 @@ install:
 script:
     - nimble install -y
     - nimble test
-    - nim doc -o:docs/xlsx.html src/xlsx/utils.nim
+
