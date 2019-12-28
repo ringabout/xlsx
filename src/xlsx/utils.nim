@@ -166,7 +166,7 @@ proc parseSharedString*(fileName: string): SharedStrings =
     else:
       discard
 
-proc praseWorkBook*(fileName: string): WorkBook =
+proc parseWorkBook*(fileName: string): WorkBook =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
@@ -623,7 +623,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   defer: removeDir(TempDir)
   let
     # contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
-    workbook = praseWorkBook(TempDir / "xl/workbook.xml")
+    workbook = parseWorkBook(TempDir / "xl/workbook.xml")
     sharedstring = parseSharedString(TempDir / "xl/sharedStrings.xml")
   if sheetName == "":
     for key, value in workbook.pairs:
