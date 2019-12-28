@@ -20,3 +20,7 @@ suite "test parse Excel":
     let data = parseExcel("tests/test.xlsx")
     data[sheetName].toCsv("tests/test.csv")
 
+  test "toSeq":
+    let data = parseExcel("tests/test.xlsx")
+    check(data[sheetName].toSeq() == @[@["name", "grade", "age"], @["simon", "", "14"], @["tom", "87", "34"]])
+    check(data[sheetName].toSeq(false) == @[@["simon", "", "14"], @["tom", "87", "34"]])
