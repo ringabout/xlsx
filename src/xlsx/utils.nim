@@ -11,7 +11,9 @@ let TempDir* = getTempDir() / "docx_windx_tmp"
 
 type
   XlsxError* = object of Exception
-  SheetDataKindError* = object of XlsxError
+  NotExistsXlsxFileError* = object of XlsxError 
+  InvalidXlsxFileError* = object of XlsxError
+  NotFoundSheetError* = object of XlsxError
   SheetDataKind* {.pure.} = enum
     Initial, Boolean, Date, Error, InlineStr, Num, SharedString, Formula
   sdk = SheetDataKind
@@ -53,10 +55,10 @@ type
 
 proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
   if not existsFile(src):
-    raise newException(IOError, "No such file: " & src)
+    raise newException(NotExistsXlsxFileError, "No such file: " & src)
   var z: ZipArchive
   if not z.open(src):
-    raise newException(IOError, "[ZIP] Can't open file: " & src)
+    raise newException(InvalidXlsxFileError, "[ZIP] Can't open file: " & src)
   z.extractAll(dest)
   z.close()
 
@@ -640,7 +642,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     return
 
   if sheetName notin workbook:
-    raise newException(XlsxError, "no such sheet name: " & sheetName)
+    raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
 
   let
     value = workbook[sheetName]
