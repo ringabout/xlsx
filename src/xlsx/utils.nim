@@ -572,16 +572,16 @@ iterator get(s: Sheet, str: SharedStrings, sep = "|", width = 10): string {.used
     yield res
 
 proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
-    skipHeader: bool): SheetArray =
+    skipHeaders: bool): SheetArray =
   let (rows, cols, _) = s.info
   result.shape = (rows, cols)
   result.header = header
   # ignore header
-  if skipHeader:
+  if skipHeaders:
     dec(result.shape.rows)
   result.data = newseq[string](result.shape.rows * cols)
   result.colType = newSeq[SheetDataKind](cols)
-  if likely(not skipHeader):
+  if likely(not skipHeaders):
     var
       start: int
       over: int
@@ -624,7 +624,7 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
     result.header = false
 
 proc parseExcel*(fileName: string, sheetName = "", header = false,
-    skipHeader = false): SheetTable =
+    skipHeaders = false): SheetTable =
   ## parse excel and return SheetTable which contains
   ## all sheetArray.
   extractXml(fileName)
@@ -636,7 +636,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   if sheetName == "":
     for key, value in workbook.pairs:
       let sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
-      result[key] = getSheetArray(sheet, sharedstring, header, skipHeader)
+      result[key] = getSheetArray(sheet, sharedstring, header, skipHeaders)
     return
 
   if sheetName notin workbook:
@@ -645,9 +645,9 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   let
     value = workbook[sheetName]
     sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
-  result[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeader)
+  result[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeaders)
 
-proc `[]`*(s: SheetArray, i, j: Natural): string = 
+proc `[]`*(s: SheetArray, i, j: Natural): string =
   # get element from SheetArray
   checkIndex(i < s.shape.rows)
   checkIndex(j < s.shape.cols)
@@ -691,7 +691,7 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
         res.add sep
     f.writeLine res
 
-proc toSeq*(s: SheetArray, includeHeaders = true): seq[seq[string]] =
+proc toSeq*(s: SheetArray, skipHeaders = true): seq[seq[string]] = # <-- HERE
   ## Parse SheetArray and return a seq[seq[string]]
   let
     sheet = s.data
@@ -703,7 +703,7 @@ proc toSeq*(s: SheetArray, includeHeaders = true): seq[seq[string]] =
   # Loop through sheet
   for r in sheet:
     # Check is headers should be included
-    if not includeHeaders and firstRow:
+    if skipHeaders and firstRow: # <-- HERE
       # If last column end header loop
       if cCount == cols:
         firstRow = false
@@ -725,7 +725,7 @@ when isMainModule:
     sheetName = "Sheet2"
     excel = "../../tests/test.xlsx"
     data = parseExcel(excel, sheetName = sheetName, header = true,
-        skipHeader = false)
+        skipHeaders = false)
 
   echo data[sheetName][1, 0]
 

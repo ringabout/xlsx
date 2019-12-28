@@ -59,7 +59,7 @@ import xlsx
 
 
 let
-  data = parseExcel("tests/test.xlsx", skipHeader = true)
+  data = parseExcel("tests/test.xlsx", skipHeaders = true)
   sheetName = "Sheet2"
 echo data[sheetName]
 ```
@@ -117,7 +117,7 @@ import xlsx
 
 let sheetName = "Sheet2"
 let data = parseExcel("tests/test.xlsx")
-let rows = data[sheetName].toSeq(false)
+let rows = data[sheetName].toSeq(true)
 for row in rows:
   echo "Name is: " & row[0]
 ```

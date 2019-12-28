@@ -12,7 +12,7 @@ suite "test parse Excel":
         "simon", "", "14", "tom", "87", "34"])
 
   test "skip header":
-    let data = parseExcel("tests/test.xlsx", skipHeader = true)
+    let data = parseExcel("tests/test.xlsx", skipHeaders = true)
     check(data[sheetName].data == @["simon", "", "14", "tom",
         "87", "34"])
 
@@ -31,5 +31,5 @@ suite "test parse Excel":
 
   test "toSeq":
     let data = parseExcel("tests/test.xlsx")
-    check(data[sheetName].toSeq() == @[@["name", "grade", "age"], @["simon", "", "14"], @["tom", "87", "34"]])
-    check(data[sheetName].toSeq(false) == @[@["simon", "", "14"], @["tom", "87", "34"]])
+    check(data[sheetName].toSeq(false) == @[@["name", "grade", "age"], @["simon", "", "14"], @["tom", "87", "34"]])
+    check(data[sheetName].toSeq(true) == @[@["simon", "", "14"], @["tom", "87", "34"]])
