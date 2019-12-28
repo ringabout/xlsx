@@ -561,7 +561,7 @@ proc plotSym(cols: int, width = 10): string {.inline.} =
     result.add repeat("-", width)
   result.add "+\n"
 
-iterator get*(s: Sheet, str: SharedStrings, sep = "|", width = 10): string =
+iterator get(s: Sheet, str: SharedStrings, sep = "|", width = 10): string {.used.} =
   let (rows, cols, _) = s.info
   for i in 0 ..< rows:
     var res = sep

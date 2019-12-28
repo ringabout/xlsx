@@ -1,4 +1,4 @@
 import xlsx / utils
-import tables
+from tables import `[]`
 export utils
 export tables
