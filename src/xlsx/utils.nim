@@ -60,6 +60,12 @@ proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
   z.extractAll(dest)
   z.close()
 
+template checkIndex(cond: untyped, msg = "") =
+  when compileOption("boundChecks"):
+    {.line.}:
+      if not cond:
+        raise newException(IndexError, msg)
+
 template `=?=`(a, b: string): bool =
   cmpIgnoreCase(a, b) == 0
 
@@ -641,6 +647,17 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
   result[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeader)
 
+proc `[]`*(s: SheetArray, i, j: Natural): string = 
+  # get element from SheetArray
+  checkIndex(i < s.shape.rows)
+  checkIndex(j < s.shape.cols)
+  s.data[i * s.shape.rows + j]
+
+proc `[]=`*(s: var SheetArray, i, j: Natural, value: string) =
+  # set element from SheetArray
+  checkIndex(i < s.shape.rows)
+  checkIndex(j < s.shape.cols)
+  s.data[i * s.shape.rows + j] = value
 
 proc `$`*(s: SheetArray): string =
   ## display SheetArray
@@ -705,10 +722,10 @@ proc toSeq*(s: SheetArray, includeHeaders = true): seq[seq[string]] =
 
 when isMainModule:
   let
-    sheetName = "sheet2"
+    sheetName = "Sheet2"
     excel = "../../tests/test.xlsx"
     data = parseExcel(excel, sheetName = sheetName, header = true,
         skipHeader = false)
 
-  echo data[sheetName].colType
+  echo data[sheetName][1, 0]
 

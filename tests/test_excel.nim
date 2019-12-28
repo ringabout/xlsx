@@ -16,6 +16,15 @@ suite "test parse Excel":
     check(data[sheetName].data == @["simon", "", "14", "tom",
         "87", "34"])
 
+  test "get one element from SheetArray":
+    let data = parseExcel("tests/test.xlsx")
+    check(data[sheetName][1, 0] == "simon")
+
+  test "set one element in SheetArray":
+    var data = parseExcel("tests/test.xlsx")
+    data[sheetName][1, 0] = "mary" 
+    check(data[sheetName][1, 0] == "mary")
+
   test "toCsv":
     let data = parseExcel("tests/test.xlsx")
     data[sheetName].toCsv("tests/test.csv")
