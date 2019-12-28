@@ -670,6 +670,35 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
         res.add sep
     f.writeLine res
 
+proc toSeq*(s: SheetArray, includeHeaders=true): seq[seq[string]] =
+  ## Parse SheetArray and return a seq[seq[string]]
+  let
+    sheet = s.data
+    (rows, cols) = s.shape
+  var
+    cCount = 1
+    firstRow = true
+    row: seq[string]
+  # Loop through sheet
+  for r in sheet:
+    # Check is headers should be included
+    if not includeHeaders and firstRow:
+      # If last column end header loop
+      if cCount == cols:
+        firstRow = false
+        cCount = 0
+      cCount += 1
+      continue
+    # Add data to internal seq[string]
+    row.add(r)
+    # Add internal seqq[string] to result var
+    if cCount == cols:
+      cCount = 1
+      result.add(row)
+      row = @[]
+    else:
+      cCount += 1
+      
 when isMainModule:
   let
     sheetName = "sheet2"
