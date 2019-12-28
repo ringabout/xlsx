@@ -100,7 +100,7 @@ proc parseContentTypes(fileName: string): ContentTypes {.used.} =
     else:
       discard
 
-proc parseStringTable*(x: var XmlParser, res: var seq[string]) =
+proc parseStringTable(x: var XmlParser, res: var seq[string]) =
   var count = 0
   while true:
     # match <si>
@@ -131,7 +131,7 @@ proc parseStringTable*(x: var XmlParser, res: var seq[string]) =
       discard
     x.next()
 
-proc parseSharedString*(fileName: string): SharedStrings =
+proc parseSharedString(fileName: string): SharedStrings =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
@@ -166,7 +166,7 @@ proc parseSharedString*(fileName: string): SharedStrings =
     else:
       discard
 
-proc parseWorkBook*(fileName: string): WorkBook =
+proc parseWorkBook(fileName: string): WorkBook =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
@@ -286,7 +286,7 @@ proc calculatePolynomial(a: string): int =
     # !Maybe raise alpha
     result = result * 27 + (ord(a[i]) - ord('A') + 1)
 
-proc parseDimension*(x: string): SheetInfo =
+proc parseDimension(x: string): SheetInfo =
   # A1:B3
   var
     rowLeft, rowRight: int
@@ -302,7 +302,7 @@ proc parseDimension*(x: string): SheetInfo =
   col = calculatePolynomial(colRight) - calculatePolynomial(colLeft) + 1
   result = (row, col, colLeft & $rowLeft)
 
-proc parsePos*(x: string, s: SheetInfo): int =
+proc parsePos(x: string, s: SheetInfo): int =
   var
     rowRight, rowLeft: int
     colRight, colLeft: string
@@ -443,7 +443,7 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
     # raise newException(XlsxError, "not support " & $kind)
   result = (pos, value)
 
-proc parseRowData*(x: var XmlParser, s: var Sheet) =
+proc parseRowData(x: var XmlParser, s: var Sheet) =
   while true:
     x.next()
     case x.kind
@@ -458,7 +458,7 @@ proc parseRowData*(x: var XmlParser, s: var Sheet) =
   # ignore />
   x.next()
 
-proc parseSheet*(fileName: string): Sheet =
+proc parseSheet(fileName: string): Sheet =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
@@ -619,6 +619,8 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
 
 proc parseExcel*(fileName: string, sheetName = "", header = false,
     skipHeader = false): SheetTable =
+  ## parse excel and return SheetTable which contains
+  ## all sheetArray.
   extractXml(fileName)
   defer: removeDir(TempDir)
   let
@@ -641,6 +643,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
 
 
 proc `$`*(s: SheetArray): string =
+  ## display SheetArray
   let
     (rows, cols) = s.shape
     width = 10
@@ -659,6 +662,7 @@ proc `$`*(s: SheetArray): string =
   result.add plotSym(cols)
 
 proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
+  ## Parse SheetArray and write a csv file
   let f = open(dest, fmWrite)
   defer: f.close()
   let (rows, cols) = s.shape
@@ -670,11 +674,11 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
         res.add sep
     f.writeLine res
 
-proc toSeq*(s: SheetArray, includeHeaders=true): seq[seq[string]] =
+proc toSeq*(s: SheetArray, includeHeaders = true): seq[seq[string]] =
   ## Parse SheetArray and return a seq[seq[string]]
   let
     sheet = s.data
-    (rows, cols) = s.shape
+    (_, cols) = s.shape
   var
     cCount = 1
     firstRow = true
@@ -691,14 +695,14 @@ proc toSeq*(s: SheetArray, includeHeaders=true): seq[seq[string]] =
       continue
     # Add data to internal seq[string]
     row.add(r)
-    # Add internal seqq[string] to result var
+    # Add internal seq[string] to result var
     if cCount == cols:
       cCount = 1
       result.add(row)
       row = @[]
     else:
       cCount += 1
-      
+
 when isMainModule:
   let
     sheetName = "sheet2"
