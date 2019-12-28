@@ -47,5 +47,4 @@ jobs:
       run: nimble install https://github.com/xflywind/xlsx -y
     - name: Test command
       run: nimble test
-    - name: Generate docs
-      run: nim doc -o:docs/xlsx.html src/xlsx/utils.nim
+
