@@ -20,6 +20,6 @@ suite "Test parse Excel":
     let data = parseAllSheetName("tests/test.xlsx")
     check(data == @["Sheet1", "Sheet2"])
 
-  test "Lines":
+  test "Read Excel by lines":
     for i in lines("tests/test.xlsx", "Sheet2"):
       discard i

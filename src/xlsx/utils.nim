@@ -656,6 +656,9 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
 
 iterator lines*(fileName: string, sheetName: string): string =
   ## return lines of xlsx
+  runnableExamples:
+    for i in lines("tests/test.xlsx", "Sheet2"):
+      echo i
   extractXml(fileName)
   defer: removeDir(TempDir)
   let
