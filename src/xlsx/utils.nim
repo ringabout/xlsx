@@ -51,6 +51,9 @@ type
     data*: seq[string]
     header*: bool
     colType*: seq[SheetDataKind]
+  SheetTensor*[T] = object
+    shape*: tuple[rows: int, cols: int]
+    data*: seq[T]
   SheetTable* = object
     data*: Table[string, SheetArray]
 
@@ -541,7 +544,7 @@ proc getKindString(item: SheetData, str: SharedStrings): string {.inline.} =
   else:
     result = ""
 
-iterator get(s: Sheet, str: SharedStrings, sep = ","): string =
+iterator get(s: Sheet, str: SharedStrings, sep = ","): string {.inline.} =
   let (rows, cols, _) = s.info
   for i in 0 ..< rows:
     var res: string
@@ -610,18 +613,17 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
     # if skip header, header should be false
     result.header = false
 
-proc parseAllSheetName*(fileName: string): seq[string] =
+proc parseAllSheetName*(fileName: string): seq[string] {.inline.} =
   ## get all sheet name
   extractXml(fileName)
   defer: removeDir(TempDir)
 
   let
-    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml") 
+    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = parseWorkBook(TempDir / contentTypes["workbook"])
   result = newSeqOfCap[string](workbook.len)
   for key in workbook.keys:
     result.add(key)
-
 
 proc parseExcel*(fileName: string, sheetName = "", header = false,
     skipHeaders = false): SheetTable =
@@ -638,12 +640,15 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   let
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = parseWorkBook(TempDir / contentTypes["workbook"])
-    sharedstring = parseSharedString(TempDir / contentTypes["sharedStrings"])
+
+  var sharedString: SharedStrings
+  if "sharedStrings" in contentTypes:
+    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"])
 
   if sheetName == "":
     for key, value in workbook.pairs:
       let sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
-      result.data[key] = getSheetArray(sheet, sharedstring, header, skipHeaders)
+      result.data[key] = getSheetArray(sheet, sharedString, header, skipHeaders)
     return
 
   if sheetName notin workbook:
@@ -652,7 +657,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   let
     value = workbook[sheetName]
     sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
-  result.data[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeaders)
+  result.data[sheetName] = getSheetArray(sheet, sharedString, header, skipHeaders)
 
 iterator lines*(fileName: string, sheetName: string): string =
   ## return lines of xlsx
@@ -664,7 +669,10 @@ iterator lines*(fileName: string, sheetName: string): string =
   let
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = parseWorkBook(TempDir / contentTypes["workbook"])
-    sharedstring = parseSharedString(TempDir / contentTypes["sharedStrings"])
+
+  var sharedString: SharedStrings
+  if "sharedStrings" in contentTypes:
+    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"])
 
   if sheetName notin workbook:
     raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
@@ -673,9 +681,8 @@ iterator lines*(fileName: string, sheetName: string): string =
     value = workbook[sheetName]
     sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
 
-  for item in get(sheet, sharedstring):
+  for item in get(sheet, sharedString):
     yield item
-
 
 proc `[]`*(s: SheetArray, i, j: Natural): string {.inline.} =
   # get element from SheetArray
@@ -737,7 +744,8 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
     result = ""
 
   if rowFlag:
-    result.add plotSym(cmax + 1, width)
+    # succ: the next value
+    result.add plotSym(succ(cmax), width)
     for i in 0 ..< rows:
       var res = "|"
       for j in 0 .. cmax:
@@ -752,9 +760,9 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
         res.add "|"
       result.add res & "\n"
       if header:
-        result.add plotSym(cmax + 1, width)
+        result.add plotSym(succ(cmax), width)
         header = false
-    result.add plotSym(cmax + 1, width)
+    result.add plotSym(succ(cmax), width)
     echo result
     return
 
@@ -780,8 +788,7 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
     echo result
     return
 
-
-  result.add plotSym(cmax + 1, width)
+  result.add plotSym(succ(cmax), width)
   for i in 0 .. rmax:
     var res = "|"
     for j in 0 .. cmax:
@@ -800,9 +807,9 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
       res.add "|"
     result.add res & "\n"
     if header:
-      result.add plotSym(cmax + 1, width)
+      result.add plotSym(succ(cmax), width)
       header = false
-  result.add plotSym(cmax + 1, width)
+  result.add plotSym(succ(cmax), width)
   echo result
 
 proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
@@ -819,7 +826,7 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
     var res = ""
     for j in 0 ..< cols:
       res.add s.data[i * cols + j]
-      if j < cols - 1:
+      if j < pred(cols):
         res.add sep
     f.writeLine res
 
@@ -859,6 +866,70 @@ proc toSeq*(s: SheetArray, skipHeaders = false): seq[seq[string]] {.inline.} = #
     else:
       cCount += 1
 
+
+proc getSheetTensor[T](s: Sheet, str: SharedStrings,
+    skipHeaders: bool): SheetTensor[T] =
+  var parseData: proc(x: string): T
+  when T is SomeSignedInt:
+    parseData = proc(x: string): T = T(x.parseInt)
+  elif T is SomeUnsignedInt:
+    parseData = proc(x: string): T = T(x.parseUInt)
+  elif T is SomeFloat:
+    parseData = proc(x: string): T = T(x.parseFloat)
+  elif T is bool:
+    parseData = parseBool
+  elif T is string:
+    parseData = proc(x: sink string): string = move(x)
+
+  let (rows, cols, _) = s.info
+  result.shape = (rows, cols)
+  # ignore header
+  if skipHeaders:
+    dec(result.shape.rows)
+  result.data = newseq[T](result.shape.rows * cols)
+  if not skipHeaders:
+    for idx, item in s.data:
+      result.data[idx] = parseData(getKindString(item, str))
+  else:
+    var
+      skipCount = cols
+      pos = 0
+    for item in s.data:
+      if skipCount > 0:
+        dec(skipCount)
+        continue
+      result.data[pos] = parseData(getKindString(item, str))
+      inc(pos)
+    result.data = result.data
+
+proc readExcel*[T: SomeNumber|bool|string](fileName: string,
+    sheetName: string, skipHeaders = false): SheetTensor[T] =
+  ## read excel for scitific calculate
+  runnableExamples:
+    let data = readExcel[int]("tests/test_int.xlsx", skipHeaders = false)
+    assert(data[sheetName].data == @[1, 4, 7, 9, 4, 7, 1, 3, 12, 54, 24, 887])
+  
+  # for arraymancy https://github.com/mratsim/Arraymancer/blob/master/src/io/io_csv.nim
+  extractXml(fileName)
+  defer: removeDir(TempDir)
+  let
+    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
+    workbook = parseWorkBook(TempDir / contentTypes["workbook"])
+
+  var sharedString: SharedStrings
+  if "sharedStrings" in contentTypes:
+    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"])
+
+  if sheetName notin workbook:
+    raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
+
+  let
+    value = workbook[sheetName]
+    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
+
+  result = getSheetTensor[T](sheet, sharedString, skipHeaders)
+
+
 when isMainModule:
   let
     sheetName = "sheet2"
@@ -866,9 +937,11 @@ when isMainModule:
     data = parseExcel(excel, sheetName = sheetName, header = true,
         skipHeaders = false)
 
-  data[sheetName].show(width = 20)
+  discard data
   # data[sheetName].show(width = 20)
   for i in lines("../../tests/test.xlsx", "Sheet2"):
     echo i
 
-  echo parseAllSheetName("../../tests/test.xlsx")
+  echo parseAllSheetName("../../tests/test_int.xlsx")
+
+  echo readExcel[float]("../../tests/test_int.xlsx", "Sheet1")
