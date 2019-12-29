@@ -56,6 +56,8 @@ type
 
 
 proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
+  ## Extract xml file from excel using zip,
+  ## default path is TempDir.
   if not existsFile(src):
     raise newException(NotExistsXlsxFileError, "No such file: " & src)
   var z: ZipArchive
@@ -76,7 +78,7 @@ template `=?=`(a, b: string): bool =
 proc matchKindName(x: XmlParser, kind: XmlEventKind, name: string): bool {.inline.} =
   x.kind == kind and x.elementName =?= name
 
-proc parseContentTypes(fileName: string): ContentTypes {.used.} =
+proc parseContentTypes(fileName: string): ContentTypes =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file" & fileName)
@@ -539,26 +541,13 @@ proc getKindString(item: SheetData, str: SharedStrings): string {.inline.} =
   else:
     result = ""
 
-proc xlsxToCsv(s: Sheet, str: SharedStrings, fileName = "test.csv",
-    sep = ",") {.used.} =
-  let f = open(fileName, fmWrite)
-  defer: f.close()
+iterator get(s: Sheet, str: SharedStrings, sep = ","): string =
   let (rows, cols, _) = s.info
   for i in 0 ..< rows:
-    var res = ""
+    var res: string
     for j in 0 ..< cols:
       let item = s.data[i * cols + j]
-      res.add getKindString(item, str)
-      if j < cols - 1:
-        res.add sep
-    f.writeLine res
-
-iterator getAlign(s: Sheet, str: SharedStrings, sep = ","): string {.used.} =
-  let (rows, cols, _) = s.info
-  for i in 0 ..< rows:
-    var res = "|"
-    for j in 0 ..< cols:
-      let item = s.data[i * cols + j]
+      res.addSep(sep)
       res.add getKindString(item, str)
     yield res
 
@@ -568,16 +557,6 @@ proc plotSym(cols: int, width = 10): string {.inline.} =
     result.add "+"
     result.add repeat("-", width)
   result.add "+\n"
-
-iterator get(s: Sheet, str: SharedStrings, sep = "|", width = 10): string {.used.} =
-  let (rows, cols, _) = s.info
-  for i in 0 ..< rows:
-    var res = sep
-    for j in 0 ..< cols:
-      let item = s.data[i * cols + j]
-      res.add alignLeft(getKindString(item, str), width)
-      res.add sep
-    yield res
 
 proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
     skipHeaders: bool): SheetArray =
@@ -661,13 +640,33 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
   result.data[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeaders)
 
-proc `[]`*(s: SheetArray, i, j: Natural): string =
+iterator lines*(fileName: string, sheetName: string): string =
+  ## return lines of xlsx
+  extractXml(fileName)
+  defer: removeDir(TempDir)
+  let
+    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
+    workbook = parseWorkBook(TempDir / contentTypes["workbook"])
+    sharedstring = parseSharedString(TempDir / contentTypes["sharedStrings"])
+
+  if sheetName notin workbook:
+    raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
+
+  let
+    value = workbook[sheetName]
+    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
+
+  for item in get(sheet, sharedstring):
+    yield item
+
+
+proc `[]`*(s: SheetArray, i, j: Natural): string {.inline.} =
   # get element from SheetArray
   checkIndex(i < s.shape.rows)
   checkIndex(j < s.shape.cols)
   s.data[i * s.shape.rows + j]
 
-proc `[]=`*(s: var SheetArray, i, j: Natural, value: string) =
+proc `[]=`*(s: var SheetArray, i, j: Natural, value: string) {.inline.} =
   # set element from SheetArray
   checkIndex(i < s.shape.rows)
   checkIndex(j < s.shape.cols)
@@ -757,7 +756,7 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
         res.add sep
     f.writeLine res
 
-proc toSeq*(s: SheetArray, skipHeaders = false): seq[seq[string]] = # <-- HERE
+proc toSeq*(s: SheetArray, skipHeaders = false): seq[seq[string]] {.inline.} = # <-- HERE
   ## Parse SheetArray and return a seq[seq[string]]
   runnableExamples:
     let sheetName = "Sheet2"
@@ -799,6 +798,8 @@ when isMainModule:
     excel = "../../tests/nim.xlsx"
     data = parseExcel(excel, sheetName = sheetName, header = true,
         skipHeaders = false)
-
-  # echo data[sheetName][1, 0]
-  data[sheetName].show(width = 20)
+  
+  echo data[sheetName][2, 3]
+  # data[sheetName].show(width = 20)
+  for i in lines("../../tests/test.xlsx", "Sheet2"):
+    echo i

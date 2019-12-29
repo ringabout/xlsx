@@ -882,6 +882,14 @@ function main() {
   </ul>
 </li>
 <li>
+  <a class="reference reference-toplevel" href="#15" id="65">Iterators</a>
+  <ul class="simple simple-toc-section">
+      <li><a class="reference" href="#lines.i%2Cstring%2Cstring"
+    title="lines(fileName: string; sheetName: string): string"><wbr />lines<span class="attachedType"></span></a></li>
+
+  </ul>
+</li>
+<li>
   <a class="reference reference-toplevel" href="#18" id="68">Templates</a>
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#%5B%5D.t%2CSheetTable%2Cstring"
@@ -987,7 +995,7 @@ function main() {
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-
+Extract xml file from excel using zip, default path is TempDir.
 
 </dd>
 <a id="parseExcel,string,string"></a>
@@ -1006,15 +1014,15 @@ parse excel and return SheetTable which contains all sheetArray.
 
 </dd>
 <a id="[],SheetArray,Natural,Natural"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%2CSheetArray%2CNatural%2CNatural"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="utils.html#SheetArray"><span class="Identifier">SheetArray</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">,</span> <span class="Identifier">j</span><span class="Other">:</span> <span class="Identifier">Natural</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IndexError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%2CSheetArray%2CNatural%2CNatural"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="utils.html#SheetArray"><span class="Identifier">SheetArray</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">,</span> <span class="Identifier">j</span><span class="Other">:</span> <span class="Identifier">Natural</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IndexError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 
 </dd>
 <a id="[]=,SheetArray,Natural,Natural,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%3D%2CSheetArray%2CNatural%2CNatural%2Cstring"><span class="Identifier">`[]=`</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="utils.html#SheetArray"><span class="Identifier">SheetArray</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">,</span> <span class="Identifier">j</span><span class="Other">:</span> <span class="Identifier">Natural</span><span class="Other">;</span> <span class="Identifier">value</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IndexError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%3D%2CSheetArray%2CNatural%2CNatural%2Cstring"><span class="Identifier">`[]=`</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="utils.html#SheetArray"><span class="Identifier">SheetArray</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">,</span> <span class="Identifier">j</span><span class="Other">:</span> <span class="Identifier">Natural</span><span class="Other">;</span> <span class="Identifier">value</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IndexError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1053,7 +1061,8 @@ Parse SheetArray and write a csv file
 
 </dd>
 <a id="toSeq,SheetArray"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#toSeq%2CSheetArray"><span class="Identifier">toSeq</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="utils.html#SheetArray"><span class="Identifier">SheetArray</span></a><span class="Other">;</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#toSeq%2CSheetArray"><span class="Identifier">toSeq</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="utils.html#SheetArray"><span class="Identifier">SheetArray</span></a><span class="Other">;</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Parse SheetArray and return a seq[seq[string]]
@@ -1063,6 +1072,21 @@ Parse SheetArray and return a seq[seq[string]]
 <span class="Keyword">let</span> <span class="Identifier">rows</span> <span class="Other">=</span> <span class="Identifier">data</span><span class="Other">[</span><span class="Identifier">sheetName</span><span class="Other">]</span><span class="Other">.</span><span class="Identifier">toSeq</span><span class="Other">(</span><span class="Identifier">false</span><span class="Other">)</span>
 <span class="Keyword">for</span> <span class="Identifier">row</span> <span class="Keyword">in</span> <span class="Identifier">rows</span><span class="Other">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">row</span></pre>
+
+</dd>
+
+</dl></div>
+<div class="section" id="15">
+<h1><a class="toc-backref" href="#15">Iterators</a></h1>
+<dl class="item">
+<a id="lines.i,string,string"></a>
+<dt><pre><span class="Keyword">iterator</span> <a href="#lines.i%2Cstring%2Cstring"><span class="Identifier">lines</span></a><span class="Other">(</span><span class="Identifier">fileName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">sheetName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">NotExistsXlsxFileError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span>
+    <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">NotFoundSheetError</span><span class="Other">,</span> <span class="Identifier">UnKnownSheetDataKindError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+return lines of xlsx
 
 </dd>
 
@@ -1087,7 +1111,7 @@ Parse SheetArray and return a seq[seq[string]]
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2019-12-29 03:05:33 UTC</small>
+        <small>Made with Nim. Generated: 2019-12-29 04:06:09 UTC</small>
       </div>
     </div>
   </div>

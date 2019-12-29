@@ -33,3 +33,7 @@ suite "test parse Excel":
     let data = parseExcel("tests/test.xlsx")
     check(data[sheetName].toSeq(false) == @[@["name", "grade", "age"], @["simon", "", "14"], @["tom", "87", "34"]])
     check(data[sheetName].toSeq(true) == @[@["simon", "", "14"], @["tom", "87", "34"]])
+
+  test "lines":
+    for i in lines("tests/test.xlsx", "Sheet2"):
+      discard i
