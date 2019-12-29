@@ -1,4 +1,4 @@
-import os, streams, parsexml, parseutils, tables, times, strformat, strutils
+import os, streams, parsexml, parseutils, tables, times, strutils
 
 import zip / zipfiles
 
@@ -11,14 +11,15 @@ let TempDir* = getTempDir() / "docx_windx_tmp"
 
 type
   XlsxError* = object of Exception
-  NotExistsXlsxFileError* = object of XlsxError 
+  NotExistsXlsxFileError* = object of XlsxError
   InvalidXlsxFileError* = object of XlsxError
   NotFoundSheetError* = object of XlsxError
+  UnKnownSheetDataKindError* = object of XlsxError
   SheetDataKind* {.pure.} = enum
     Initial, Boolean, Date, Error, InlineStr, Num, SharedString, Formula
   sdk = SheetDataKind
   WorkBook* = Table[string, string]
-  ContentTypes* = seq[string]
+  ContentTypes* = Table[string, string]
   SharedStrings* = seq[string]
   SheetData* = object
     case kind: SheetDataKind
@@ -96,7 +97,10 @@ proc parseContentTypes(fileName: string): ContentTypes {.used.} =
           of xmlAttribute:
             # match attr PartName
             if x.attrKey =?= "PartName":
-              result.add x.attrValue
+              let
+                path = x.attrValue
+                name = path.splitFile.name
+              result[name] = path
           of xmlElementEnd:
             break
           else:
@@ -336,7 +340,8 @@ proc parseDataKind(s: string): SheetDataKind {.inline.} =
   of "n": sdk.Num
   of "s": sdk.SharedString
   of "str": sdk.Formula
-  else: raise
+  else: 
+    raise newException(UnKnownSheetDataKindError, "unsupport sheet data kind")
 
 proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
   # <c r="A2" t="s">
@@ -632,12 +637,12 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   extractXml(fileName)
   defer: removeDir(TempDir)
   let
-    # contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
-    workbook = parseWorkBook(TempDir / "xl/workbook.xml")
-    sharedstring = parseSharedString(TempDir / "xl/sharedStrings.xml")
+    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
+    workbook = parseWorkBook(TempDir / contentTypes["workbook"])
+    sharedstring = parseSharedString(TempDir / contentTypes["sharedStrings"])
   if sheetName == "":
     for key, value in workbook.pairs:
-      let sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
+      let sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
       result[key] = getSheetArray(sheet, sharedstring, header, skipHeaders)
     return
 
@@ -646,7 +651,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
 
   let
     value = workbook[sheetName]
-    sheet = parseSheet(TempDir / fmt"xl/worksheets/sheet{value}.xml")
+    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
   result[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeaders)
 
 proc `[]`*(s: SheetArray, i, j: Natural): string =
