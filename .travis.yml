@@ -29,11 +29,11 @@ addons: # This will only be executed on Linux
     packages:
       - libzip-dev
 
-# before_install:
-#   # If you want to install an OSX Homebrew dependency
-#   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
-#   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libyourdependency; fi
-# ## END: Assuming you rely on external dependencies
+before_install:
+  # If you want to install an OSX Homebrew dependency
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libzip; fi
+## END: Assuming you rely on external dependencies
 
 install:
   - export CHOOSENIM_NO_ANALYTICS=1
