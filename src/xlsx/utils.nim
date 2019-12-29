@@ -58,6 +58,8 @@ type
     data*: Table[string, SheetArray]
 
 
+{.passl: "-lz".}
+
 proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
   ## Extract xml file from excel using zip,
   ## default path is TempDir.
