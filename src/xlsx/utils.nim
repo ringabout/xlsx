@@ -708,22 +708,72 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
   let
     (rows, cols) = s.shape
     width = width
-    mrows = min(rows + 1, rmax)
-    mcols = min(cols + 1, cmax)
+    rowFlag = rows <= rmax
+    colFlag = cols <= cmax
+
+  if rowFlag and colFlag:
+    echo $s
+    return
+  
   var
     header = s.header
     result = ""
 
-  result.add plotSym(mcols, width)
-  for i in 0 ..< mrows:
+  if rowFlag:
+    result.add plotSym(cmax + 1, width)
+    for i in 0 ..< rows:
+      var res = "|"
+      for j in 0 .. cmax:
+        var item: string
+        if j == cmax:
+          # if last row
+          item = repeat(".", min(width, 3))
+          res.add center(item[0 ..< min(width, item.len)], width)
+        else:
+          item = s.data[i * cols + j]
+          res.add alignLeft(item[0 ..< min(width, item.len)], width)
+        res.add "|"
+      result.add res & "\n"
+      if header:
+        result.add plotSym(cmax + 1, width)
+        header = false
+    result.add plotSym(cmax + 1, width)
+    echo result
+    return
+
+  if colFlag:
+    result.add plotSym(cols, width)
+    for i in 0 .. rmax:
+      var res = "|"
+      for j in 0 ..< cols:
+        var item: string
+        if i == rmax:
+          # if last row
+          item = repeat(".", min(width, 3))
+          res.add center(item[0 ..< min(width, item.len)], width)
+        else:
+          item = s.data[i * cols + j]
+          res.add alignLeft(item[0 ..< min(width, item.len)], width)
+        res.add "|"
+      result.add res & "\n"
+      if header:
+        result.add plotSym(cols, width)
+        header = false
+    result.add plotSym(cols, width)
+    echo result
+    return
+
+
+  result.add plotSym(cmax+ 1, width)
+  for i in 0 .. rmax:
     var res = "|"
-    for j in 0 ..< mcols:
+    for j in 0 .. cmax:
       var item: string
-      if i == mrows - 1:
+      if i == rmax:
         # if last col,
         item = repeat(".", min(width, 3))
         res.add center(item[0 ..< min(width, item.len)], width)
-      elif j == mcols - 1:
+      elif j == cmax:
         # if last row
         item = repeat(".", min(width, 3))
         res.add center(item[0 ..< min(width, item.len)], width)
@@ -733,9 +783,9 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
       res.add "|"
     result.add res & "\n"
     if header:
-      result.add plotSym(mcols, width)
+      result.add plotSym(cmax + 1, width)
       header = false
-  result.add plotSym(mcols, width)
+  result.add plotSym(cmax + 1, width)
   echo result
 
 proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
@@ -799,7 +849,7 @@ when isMainModule:
     data = parseExcel(excel, sheetName = sheetName, header = true,
         skipHeaders = false)
   
-  echo data[sheetName][2, 3]
+  data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   for i in lines("../../tests/test.xlsx", "Sheet2"):
     echo i
