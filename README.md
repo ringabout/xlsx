@@ -73,7 +73,7 @@ output:
 +----------+----------+----------+
 ```
 
-#### Convert to csv
+#### Convert to Csv
 
 ```nim
 import xlsx

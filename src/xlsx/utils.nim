@@ -813,7 +813,7 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
   echo result
 
 proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
-  ## Parse SheetArray and write a csv file
+  ## Parse SheetArray and write a Csv file
   runnableExamples:
     let sheetName = "Sheet2"
     let data = parseExcel("tests/test.xlsx")
@@ -916,7 +916,7 @@ proc getSheetTensor[T](s: Sheet, str: SharedStrings,
 
 proc readExcel*[T: SomeNumber|bool|string](fileName: string,
     sheetName: string, skipHeaders = false): SheetTensor[T] =
-  ## read excel for scitific calculate
+  ## read excel for scientific calculation
   # for arraymancy https://github.com/mratsim/Arraymancer/blob/master/src/io
   runnableExamples:
     let sheetName = "Sheet1"
