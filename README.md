@@ -81,7 +81,7 @@ import xlsx
 
 let sheetName = "Sheet2"
 let data = parseExcel("tests/test.xlsx")
-data[sheetName].toCsv("test.csv", sep = ",")
+data[sheetName].toCsv("tests/test.csv", sep = ",")
 ```
 
 output:

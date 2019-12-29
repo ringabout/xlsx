@@ -51,7 +51,8 @@ type
     data*: seq[string]
     header*: bool
     colType*: seq[SheetDataKind]
-  SheetTable* = Table[string, SheetArray]
+  SheetTable* = object
+    data*: Table[string, SheetArray]
 
 
 proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
@@ -634,6 +635,12 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     skipHeaders = false): SheetTable =
   ## parse excel and return SheetTable which contains
   ## all sheetArray.
+  runnableExamples:
+    let
+      data = parseExcel("tests/test.xlsx")
+      sheetName = "Sheet2"
+    echo data[sheetName]
+
   extractXml(fileName)
   defer: removeDir(TempDir)
   let
@@ -643,7 +650,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   if sheetName == "":
     for key, value in workbook.pairs:
       let sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
-      result[key] = getSheetArray(sheet, sharedstring, header, skipHeaders)
+      result.data[key] = getSheetArray(sheet, sharedstring, header, skipHeaders)
     return
 
   if sheetName notin workbook:
@@ -652,7 +659,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   let
     value = workbook[sheetName]
     sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
-  result[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeaders)
+  result.data[sheetName] = getSheetArray(sheet, sharedstring, header, skipHeaders)
 
 proc `[]`*(s: SheetArray, i, j: Natural): string =
   # get element from SheetArray
@@ -665,6 +672,9 @@ proc `[]=`*(s: var SheetArray, i, j: Natural, value: string) =
   checkIndex(i < s.shape.rows)
   checkIndex(j < s.shape.cols)
   s.data[i * s.shape.rows + j] = value
+
+template `[]`*(s: SheetTable, key: string): SheetArray = 
+  s.data[key]
 
 proc `$`*(s: SheetArray): string =
   ## display SheetArray
@@ -687,6 +697,11 @@ proc `$`*(s: SheetArray): string =
 
 proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
   ## Parse SheetArray and write a csv file
+  runnableExamples:
+    let sheetName = "Sheet2"
+    let data = parseExcel("tests/test.xlsx")
+    data[sheetName].toCsv("tests/test.csv", sep = ",")
+
   let f = open(dest, fmWrite)
   defer: f.close()
   let (rows, cols) = s.shape
@@ -700,6 +715,13 @@ proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
 
 proc toSeq*(s: SheetArray, skipHeaders = false): seq[seq[string]] = # <-- HERE
   ## Parse SheetArray and return a seq[seq[string]]
+  runnableExamples:
+    let sheetName = "Sheet2"
+    let data = parseExcel("tests/test.xlsx")
+    let rows = data[sheetName].toSeq(false)
+    for row in rows:
+      echo row
+
   let
     sheet = s.data
     (_, cols) = s.shape
