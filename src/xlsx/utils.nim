@@ -6,7 +6,7 @@ import zip / zipfiles
 const
   UpperLetters = {'A' .. 'Z'}
   CharDataOption = {xmlCharData, xmlWhitespace}
-let TempDir* = getTempDir() / "docx_windx_tmp"
+let TempDir* = getTempDir() / "xlsx_windx_tmp"
 
 
 type
@@ -610,6 +610,19 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
     # if skip header, header should be false
     result.header = false
 
+proc parseAllSheetName*(fileName: string): seq[string] =
+  ## get all sheet name
+  extractXml(fileName)
+  defer: removeDir(TempDir)
+
+  let
+    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml") 
+    workbook = parseWorkBook(TempDir / contentTypes["workbook"])
+  result = newSeqOfCap[string](workbook.len)
+  for key in workbook.keys:
+    result.add(key)
+
+
 proc parseExcel*(fileName: string, sheetName = "", header = false,
     skipHeaders = false): SheetTable =
   ## parse excel and return SheetTable which contains
@@ -626,6 +639,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = parseWorkBook(TempDir / contentTypes["workbook"])
     sharedstring = parseSharedString(TempDir / contentTypes["sharedStrings"])
+
   if sheetName == "":
     for key, value in workbook.pairs:
       let sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
@@ -702,9 +716,9 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
       excel = "tests/nim.xlsx"
       data = parseExcel(excel, sheetName = sheetName, header = true,
           skipHeaders = false)
-  
+
     data[sheetName].show(width = 20)
-  
+
   let
     (rows, cols) = s.shape
     width = width
@@ -714,7 +728,7 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
   if rowFlag and colFlag:
     echo $s
     return
-  
+
   var
     header = s.header
     result = ""
@@ -764,7 +778,7 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
     return
 
 
-  result.add plotSym(cmax+ 1, width)
+  result.add plotSym(cmax + 1, width)
   for i in 0 .. rmax:
     var res = "|"
     for j in 0 .. cmax:
@@ -848,8 +862,10 @@ when isMainModule:
     excel = "../../tests/nim.xlsx"
     data = parseExcel(excel, sheetName = sheetName, header = true,
         skipHeaders = false)
-  
+
   data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   for i in lines("../../tests/test.xlsx", "Sheet2"):
     echo i
+
+  echo parseAllSheetName("../../tests/test.xlsx")
