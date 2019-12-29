@@ -16,3 +16,6 @@ requires "zip >= 0.2.1"
 # tests
 task test, "Run all tests":
   exec "nim c -r tests/alltests.nim"
+
+task test_arc, "Run all tests with arc":
+  exec "nim c -r --gc:arc tests/alltests.nim"

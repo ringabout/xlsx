@@ -9,10 +9,6 @@ matrix:
   include:
     # Build and test against the master (stable) and devel branches of Nim
     - os: linux
-      env: CHANNEL=stable
-      compiler: gcc
-
-    - os: linux
       env: CHANNEL=devel
       compiler: gcc
 
@@ -24,7 +20,6 @@ matrix:
   allow_failures:
     # Ignore failures when building against the devel Nim branch
     # Also ignore OSX, due to very long build queue
-    - env: CHANNEL=devel
     - os: osx
   fast_finish: true
 
@@ -51,4 +46,5 @@ install:
 script:
     - nimble install -y
     - nimble test
+    # - nimble test_arc
 
