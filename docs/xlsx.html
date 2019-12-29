@@ -884,6 +884,8 @@ function main() {
     title="toCsv(s: SheetArray; dest: string; sep = &quot;,&quot;)"><wbr />to<wbr />Csv<span class="attachedType">SheetArray</span></a></li>
   <li><a class="reference" href="#toSeq%2CSheetArray"
     title="toSeq(s: SheetArray; skipHeaders = false): seq[seq[string]]"><wbr />to<wbr />Seq<span class="attachedType">SheetArray</span></a></li>
+  <li><a class="reference" href="#parseData"
+    title="parseData[T](x: sink string): T"><wbr />parse<wbr />Data<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#readExcel%2Cstring%2Cstring"
     title="readExcel[T: SomeNumber | bool | string](fileName: string; sheetName: string;
                                     skipHeaders = false): SheetTensor[T]"><wbr />read<wbr />Excel<span class="attachedType">SheetTensor</span></a></li>
@@ -1103,6 +1105,13 @@ Parse SheetArray and return a seq[seq[string]]
   <span class="Identifier">echo</span> <span class="Identifier">row</span></pre>
 
 </dd>
+<a id="parseData"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#parseData"><span class="Identifier">parseData</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">sink</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+
+</dd>
 <a id="readExcel,string,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#readExcel%2Cstring%2Cstring"><span class="Identifier">readExcel</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Identifier">SomeNumber</span> <span class="Operator">|</span> <span class="Identifier">bool</span> <span class="Operator">|</span> <span class="Identifier">string</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">fileName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">sheetName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
                                         <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="utils.html#SheetTensor"><span class="Identifier">SheetTensor</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span></pre></dt>
@@ -1112,7 +1121,7 @@ read excel for scitific calculate
 <p><strong class="examples_text">Examples:</strong></p>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="StringLit">&quot;Sheet1&quot;</span>
 <span class="Keyword">let</span> <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">readExcel</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">(</span><span class="StringLit">&quot;tests/test_int.xlsx&quot;</span><span class="Other">,</span> <span class="Identifier">sheetName</span><span class="Other">,</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span>
-<span class="Identifier">assert</span><span class="Other">(</span><span class="Identifier">data</span><span class="Other">.</span><span class="Identifier">data</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Other">[</span><span class="DecNumber">1</span><span class="Other">,</span> <span class="DecNumber">4</span><span class="Other">,</span> <span class="DecNumber">7</span><span class="Other">,</span> <span class="DecNumber">9</span><span class="Other">,</span> <span class="DecNumber">4</span><span class="Other">,</span> <span class="DecNumber">7</span><span class="Other">,</span> <span class="DecNumber">1</span><span class="Other">,</span> <span class="DecNumber">3</span><span class="Other">,</span> <span class="DecNumber">12</span><span class="Other">,</span> <span class="DecNumber">54</span><span class="Other">,</span> <span class="DecNumber">24</span><span class="Other">,</span> <span class="DecNumber">887</span><span class="Other">]</span><span class="Other">)</span></pre>
+<span class="Identifier">assert</span><span class="Other">(</span><span class="Identifier">data</span><span class="Other">.</span><span class="Identifier">data</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Other">[</span><span class="DecNumber">1</span><span class="Other">,</span> <span class="DecNumber">4</span><span class="Other">,</span> <span class="DecNumber">7</span><span class="Other">,</span> <span class="DecNumber">9</span><span class="Other">,</span> <span class="DecNumber">4</span><span class="Other">,</span> <span class="DecNumber">7</span><span class="Other">,</span> <span class="DecNumber">0</span><span class="Other">,</span> <span class="DecNumber">3</span><span class="Other">,</span> <span class="DecNumber">12</span><span class="Other">,</span> <span class="DecNumber">54</span><span class="Other">,</span> <span class="DecNumber">24</span><span class="Other">,</span> <span class="DecNumber">887</span><span class="Other">]</span><span class="Other">)</span></pre>
 
 </dd>
 
@@ -1155,7 +1164,7 @@ return lines of xlsx
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2019-12-29 12:26:52 UTC</small>
+        <small>Made with Nim. Generated: 2019-12-29 13:21:25 UTC</small>
       </div>
     </div>
   </div>

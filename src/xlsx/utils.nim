@@ -866,21 +866,33 @@ proc toSeq*(s: SheetArray, skipHeaders = false): seq[seq[string]] {.inline.} = #
     else:
       cCount += 1
 
+proc parseData*[T](x: sink string): T {.inline.} = 
+  when T is SomeSignedInt:
+    try:
+      result = T(x.parseInt)
+    except ValueError:
+      discard
+  elif T is SomeUnsignedInt:
+    try:
+      result = T(x.parseUInt)
+    except ValueError:
+      discard
+  elif T is SomeFloat:
+    try:
+      result = T(x.parseFloat)
+    except ValueError:
+      discard
+  elif T is bool:
+    try:
+      result = T(x.parseBool)
+    except ValueError:
+      discard
+  elif T is string:
+    result = move(x)
+
 
 proc getSheetTensor[T](s: Sheet, str: SharedStrings,
     skipHeaders: bool): SheetTensor[T] =
-  var parseData: proc(x: string): T
-  when T is SomeSignedInt:
-    parseData = proc(x: string): T = T(x.parseInt)
-  elif T is SomeUnsignedInt:
-    parseData = proc(x: string): T = T(x.parseUInt)
-  elif T is SomeFloat:
-    parseData = proc(x: string): T = T(x.parseFloat)
-  elif T is bool:
-    parseData = parseBool
-  elif T is string:
-    parseData = proc(x: sink string): string = move(x)
-
   let (rows, cols, _) = s.info
   result.shape = (rows, cols)
   # ignore header
@@ -889,7 +901,7 @@ proc getSheetTensor[T](s: Sheet, str: SharedStrings,
   result.data = newseq[T](result.shape.rows * cols)
   if not skipHeaders:
     for idx, item in s.data:
-      result.data[idx] = parseData(getKindString(item, str))
+      result.data[idx] = parseData[T](getKindString(item, str))
   else:
     var
       skipCount = cols
@@ -898,20 +910,21 @@ proc getSheetTensor[T](s: Sheet, str: SharedStrings,
       if skipCount > 0:
         dec(skipCount)
         continue
-      result.data[pos] = parseData(getKindString(item, str))
+      result.data[pos] = parseData[T](getKindString(item, str))
       inc(pos)
     result.data = result.data
 
 proc readExcel*[T: SomeNumber|bool|string](fileName: string,
     sheetName: string, skipHeaders = false): SheetTensor[T] =
   ## read excel for scitific calculate
+  # for arraymancy https://github.com/mratsim/Arraymancer/blob/master/src/io
   runnableExamples:
     let sheetName = "Sheet1"
     let data = readExcel[int]("tests/test_int.xlsx", sheetName,
         skipHeaders = false)
-    assert(data.data == @[1, 4, 7, 9, 4, 7, 1, 3, 12, 54, 24, 887])
+    # if missing value, will fill default value of T
+    assert(data.data == @[1, 4, 7, 9, 4, 7, 0, 3, 12, 54, 24, 887])
 
-  # for arraymancy https://github.com/mratsim/Arraymancer/blob/master/src/io/io_csv.nim
   extractXml(fileName)
   defer: removeDir(TempDir)
   let
