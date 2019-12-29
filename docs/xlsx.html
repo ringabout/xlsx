@@ -872,6 +872,8 @@ function main() {
     title="`[]=`(s: var SheetArray; i, j: Natural; value: string)"><wbr />`[]=`<span class="attachedType">SheetArray</span></a></li>
   <li><a class="reference" href="#%24%2CSheetArray"
     title="`$`(s: SheetArray): string"><wbr />`$`<span class="attachedType">SheetArray</span></a></li>
+  <li><a class="reference" href="#show%2CSheetArray%2Cint%2Cint%2Cint"
+    title="show(s: SheetArray; rmax = 20; cmax = 5; width = 10)"><wbr />show<span class="attachedType">SheetArray</span></a></li>
   <li><a class="reference" href="#toCsv%2CSheetArray%2Cstring%2Cstring"
     title="toCsv(s: SheetArray; dest: string; sep = &quot;,&quot;)"><wbr />to<wbr />Csv<span class="attachedType">SheetArray</span></a></li>
   <li><a class="reference" href="#toSeq%2CSheetArray"
@@ -1025,6 +1027,19 @@ parse excel and return SheetTable which contains all sheetArray.
 display SheetArray
 
 </dd>
+<a id="show,SheetArray,int,int,int"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#show%2CSheetArray%2Cint%2Cint%2Cint"><span class="Identifier">show</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="utils.html#SheetArray"><span class="Identifier">SheetArray</span></a><span class="Other">;</span> <span class="Identifier">rmax</span> <span class="Other">=</span> <span class="DecNumber">20</span><span class="Other">;</span> <span class="Identifier">cmax</span> <span class="Other">=</span> <span class="DecNumber">5</span><span class="Other">;</span> <span class="Identifier">width</span> <span class="Other">=</span> <span class="DecNumber">10</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+display SheetArray with more control
+<p><strong class="examples_text">Examples:</strong></p>
+<pre class="listing"><span class="Keyword">let</span>
+  <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="StringLit">&quot;sheet2&quot;</span>
+  <span class="Identifier">excel</span> <span class="Other">=</span> <span class="StringLit">&quot;tests/nim.xlsx&quot;</span>
+  <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">parseExcel</span><span class="Other">(</span><span class="Identifier">excel</span><span class="Other">,</span> <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="Identifier">sheetName</span><span class="Other">,</span> <span class="Identifier">header</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">,</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span>
+<span class="Identifier">data</span><span class="Other">[</span><span class="Identifier">sheetName</span><span class="Other">]</span><span class="Other">.</span><span class="Identifier">show</span><span class="Other">(</span><span class="Identifier">width</span> <span class="Other">=</span> <span class="DecNumber">20</span><span class="Other">)</span></pre>
+
+</dd>
 <a id="toCsv,SheetArray,string,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#toCsv%2CSheetArray%2Cstring%2Cstring"><span class="Identifier">toCsv</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="utils.html#SheetArray"><span class="Identifier">SheetArray</span></a><span class="Other">;</span> <span class="Identifier">dest</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">sep</span> <span class="Other">=</span> <span class="StringLit">&quot;,&quot;</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
@@ -1072,7 +1087,7 @@ Parse SheetArray and return a seq[seq[string]]
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2019-12-29 02:35:37 UTC</small>
+        <small>Made with Nim. Generated: 2019-12-29 03:05:33 UTC</small>
       </div>
     </div>
   </div>

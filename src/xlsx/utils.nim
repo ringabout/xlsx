@@ -341,7 +341,7 @@ proc parseDataKind(s: string): SheetDataKind {.inline.} =
   of "n": sdk.Num
   of "s": sdk.SharedString
   of "str": sdk.Formula
-  else: 
+  else:
     raise newException(UnKnownSheetDataKindError, "unsupport sheet data kind")
 
 proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
@@ -673,7 +673,7 @@ proc `[]=`*(s: var SheetArray, i, j: Natural, value: string) =
   checkIndex(j < s.shape.cols)
   s.data[i * s.shape.rows + j] = value
 
-template `[]`*(s: SheetTable, key: string): SheetArray = 
+template `[]`*(s: SheetTable, key: string): SheetArray =
   s.data[key]
 
 proc `$`*(s: SheetArray): string =
@@ -682,7 +682,7 @@ proc `$`*(s: SheetArray): string =
     (rows, cols) = s.shape
     width = 10
   var header = s.header
-  result.add plotSym(cols)
+  result.add plotSym(cols, width)
   for i in 0 ..< rows:
     var res = "|"
     for j in 0 ..< cols:
@@ -694,6 +694,50 @@ proc `$`*(s: SheetArray): string =
       result.add plotSym(cols)
       header = false
   result.add plotSym(cols)
+
+proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
+  ## display SheetArray with more control
+  runnableExamples:
+    let
+      sheetName = "sheet2"
+      excel = "tests/nim.xlsx"
+      data = parseExcel(excel, sheetName = sheetName, header = true,
+          skipHeaders = false)
+  
+    data[sheetName].show(width = 20)
+  
+  let
+    (rows, cols) = s.shape
+    width = width
+    mrows = min(rows + 1, rmax)
+    mcols = min(cols + 1, cmax)
+  var
+    header = s.header
+    result = ""
+
+  result.add plotSym(mcols, width)
+  for i in 0 ..< mrows:
+    var res = "|"
+    for j in 0 ..< mcols:
+      var item: string
+      if i == mrows - 1:
+        # if last col,
+        item = repeat(".", min(width, 3))
+        res.add center(item[0 ..< min(width, item.len)], width)
+      elif j == mcols - 1:
+        # if last row
+        item = repeat(".", min(width, 3))
+        res.add center(item[0 ..< min(width, item.len)], width)
+      else:
+        item = s.data[i * cols + j]
+        res.add alignLeft(item[0 ..< min(width, item.len)], width)
+      res.add "|"
+    result.add res & "\n"
+    if header:
+      result.add plotSym(mcols, width)
+      header = false
+  result.add plotSym(mcols, width)
+  echo result
 
 proc toCsv*(s: SheetArray, dest: string, sep = ",") {.inline.} =
   ## Parse SheetArray and write a csv file
@@ -751,10 +795,10 @@ proc toSeq*(s: SheetArray, skipHeaders = false): seq[seq[string]] = # <-- HERE
 
 when isMainModule:
   let
-    sheetName = "Sheet2"
-    excel = "../../tests/test.xlsx"
+    sheetName = "sheet2"
+    excel = "../../tests/nim.xlsx"
     data = parseExcel(excel, sheetName = sheetName, header = true,
         skipHeaders = false)
 
-  echo data[sheetName][1, 0]
-
+  # echo data[sheetName][1, 0]
+  data[sheetName].show(width = 20)
