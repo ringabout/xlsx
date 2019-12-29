@@ -834,48 +834,11 @@ function main() {
     title="InvalidXlsxFileError = object of XlsxError"><wbr />Invalid<wbr />Xlsx<wbr />File<wbr />Error<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#NotFoundSheetError"
     title="NotFoundSheetError = object of XlsxError"><wbr />Not<wbr />Found<wbr />Sheet<wbr />Error<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#UnKnownSheetDataKindError"
+    title="UnKnownSheetDataKindError = object of XlsxError"><wbr />Un<wbr />Known<wbr />Sheet<wbr />Data<wbr />Kind<wbr />Error<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#SheetDataKind"
     title="SheetDataKind {.pure.} = enum
   Initial, Boolean, Date, Error, InlineStr, Num, SharedString, Formula"><wbr />Sheet<wbr />Data<wbr />Kind<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#WorkBook"
-    title="WorkBook = Table[string, string]"><wbr />Work<wbr />Book<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#ContentTypes"
-    title="ContentTypes = seq[string]"><wbr />Content<wbr />Types<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#SharedStrings"
-    title="SharedStrings = seq[string]"><wbr />Shared<wbr />Strings<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#SheetData"
-    title="SheetData = object
-  case kind: SheetDataKind
-  of sdk.Boolean:
-      bvalue: string
-
-  of sdk.Date:
-      dvalue: string
-
-  of sdk.InlineStr:
-      isvalue: string
-
-  of sdk.Num:
-      nvalue: string
-
-  of sdk.SharedString:
-      svalue: string
-
-  of sdk.Formula:
-      fvalue: string
-      fnvalue: string
-
-  of sdk.Error:
-      error: string
-
-  else:
-      nil"><wbr />Sheet<wbr />Data<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#SheetInfo"
-    title="SheetInfo = tuple[rows, cols: int, start: string]"><wbr />Sheet<wbr />Info<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#Sheet"
-    title="Sheet = object
-  info*: SheetInfo
-  data*: seq[SheetData]"><wbr />Sheet<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#SheetArray"
     title="SheetArray = object
   shape*: tuple[rows: int, cols: int]
@@ -954,81 +917,16 @@ function main() {
 
 
 </dd>
+<a id="UnKnownSheetDataKindError"></a>
+<dt><pre><a href="utils.html#UnKnownSheetDataKindError"><span class="Identifier">UnKnownSheetDataKindError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="utils.html#XlsxError"><span class="Identifier">XlsxError</span></a></pre></dt>
+<dd>
+
+
+
+</dd>
 <a id="SheetDataKind"></a>
 <dt><pre><a href="utils.html#SheetDataKind"><span class="Identifier">SheetDataKind</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">pure</span></span><span class="Other">.}</span></span> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">Initial</span><span class="Other">,</span> <span class="Identifier">Boolean</span><span class="Other">,</span> <span class="Identifier">Date</span><span class="Other">,</span> <span class="Identifier">Error</span><span class="Other">,</span> <span class="Identifier">InlineStr</span><span class="Other">,</span> <span class="Identifier">Num</span><span class="Other">,</span> <span class="Identifier">SharedString</span><span class="Other">,</span> <span class="Identifier">Formula</span></pre></dt>
-<dd>
-
-
-
-</dd>
-<a id="WorkBook"></a>
-<dt><pre><a href="utils.html#WorkBook"><span class="Identifier">WorkBook</span></a> <span class="Other">=</span> <span class="Identifier">Table</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">string</span><span class="Other">]</span></pre></dt>
-<dd>
-
-
-
-</dd>
-<a id="ContentTypes"></a>
-<dt><pre><a href="utils.html#ContentTypes"><span class="Identifier">ContentTypes</span></a> <span class="Other">=</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span></pre></dt>
-<dd>
-
-
-
-</dd>
-<a id="SharedStrings"></a>
-<dt><pre><a href="utils.html#SharedStrings"><span class="Identifier">SharedStrings</span></a> <span class="Other">=</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span></pre></dt>
-<dd>
-
-
-
-</dd>
-<a id="SheetData"></a>
-<dt><pre><a href="utils.html#SheetData"><span class="Identifier">SheetData</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Keyword">case</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="utils.html#SheetDataKind"><span class="Identifier">SheetDataKind</span></a>
-  <span class="Keyword">of</span> <span class="Identifier">sdk</span><span class="Other">.</span><span class="Identifier">Boolean</span><span class="Other">:</span>
-      <span class="Identifier">bvalue</span><span class="Other">:</span> <span class="Identifier">string</span>
-
-  <span class="Keyword">of</span> <span class="Identifier">sdk</span><span class="Other">.</span><span class="Identifier">Date</span><span class="Other">:</span>
-      <span class="Identifier">dvalue</span><span class="Other">:</span> <span class="Identifier">string</span>
-
-  <span class="Keyword">of</span> <span class="Identifier">sdk</span><span class="Other">.</span><span class="Identifier">InlineStr</span><span class="Other">:</span>
-      <span class="Identifier">isvalue</span><span class="Other">:</span> <span class="Identifier">string</span>
-
-  <span class="Keyword">of</span> <span class="Identifier">sdk</span><span class="Other">.</span><span class="Identifier">Num</span><span class="Other">:</span>
-      <span class="Identifier">nvalue</span><span class="Other">:</span> <span class="Identifier">string</span>
-
-  <span class="Keyword">of</span> <span class="Identifier">sdk</span><span class="Other">.</span><span class="Identifier">SharedString</span><span class="Other">:</span>
-      <span class="Identifier">svalue</span><span class="Other">:</span> <span class="Identifier">string</span>
-
-  <span class="Keyword">of</span> <span class="Identifier">sdk</span><span class="Other">.</span><span class="Identifier">Formula</span><span class="Other">:</span>
-      <span class="Identifier">fvalue</span><span class="Other">:</span> <span class="Identifier">string</span>
-      <span class="Identifier">fnvalue</span><span class="Other">:</span> <span class="Identifier">string</span>
-
-  <span class="Keyword">of</span> <span class="Identifier">sdk</span><span class="Other">.</span><span class="Identifier">Error</span><span class="Other">:</span>
-      <span class="Identifier">error</span><span class="Other">:</span> <span class="Identifier">string</span>
-
-  <span class="Keyword">else</span><span class="Other">:</span>
-      <span class="Keyword">nil</span>
-
-  </pre></dt>
-<dd>
-
-
-
-</dd>
-<a id="SheetInfo"></a>
-<dt><pre><a href="utils.html#SheetInfo"><span class="Identifier">SheetInfo</span></a> <span class="Other">=</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">rows</span><span class="Other">,</span> <span class="Identifier">cols</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">start</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">]</span></pre></dt>
-<dd>
-
-
-
-</dd>
-<a id="Sheet"></a>
-<dt><pre><a href="utils.html#Sheet"><span class="Identifier">Sheet</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">info</span><span class="Operator">*</span><span class="Other">:</span> <a href="utils.html#SheetInfo"><span class="Identifier">SheetInfo</span></a>
-  <span class="Identifier">data</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="utils.html#SheetData"><span class="Identifier">SheetData</span></a><span class="Other">]</span>
-</pre></dt>
 <dd>
 
 
@@ -1082,7 +980,7 @@ function main() {
 <a id="parseExcel,string,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#parseExcel%2Cstring%2Cstring"><span class="Identifier">parseExcel</span></a><span class="Other">(</span><span class="Identifier">fileName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">header</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="utils.html#SheetTable"><span class="Identifier">SheetTable</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
     <span class="Identifier">NotExistsXlsxFileError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span>
-    <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">NotFoundSheetError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">UnKnownSheetDataKindError</span><span class="Other">,</span> <span class="Identifier">NotFoundSheetError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1136,7 +1034,7 @@ Parse SheetArray and return a seq[seq[string]]
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2019-12-28 15:01:22 UTC</small>
+        <small>Made with Nim. Generated: 2019-12-29 02:11:46 UTC</small>
       </div>
     </div>
   </div>

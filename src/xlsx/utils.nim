@@ -18,10 +18,10 @@ type
   SheetDataKind* {.pure.} = enum
     Initial, Boolean, Date, Error, InlineStr, Num, SharedString, Formula
   sdk = SheetDataKind
-  WorkBook* = Table[string, string]
-  ContentTypes* = Table[string, string]
-  SharedStrings* = seq[string]
-  SheetData* = object
+  WorkBook = Table[string, string]
+  ContentTypes = Table[string, string]
+  SharedStrings = seq[string]
+  SheetData = object
     case kind: SheetDataKind
     of sdk.Boolean:
       bvalue: string
@@ -40,12 +40,12 @@ type
       error: string
     else:
       discard
-  SheetInfo* = tuple
+  SheetInfo = tuple
     rows, cols: int
     start: string
-  Sheet* = object
-    info*: SheetInfo
-    data*: seq[SheetData]
+  Sheet = object
+    info: SheetInfo
+    data: seq[SheetData]
   SheetArray* = object
     shape*: tuple[rows: int, cols: int]
     data*: seq[string]
