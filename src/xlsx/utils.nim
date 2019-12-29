@@ -906,9 +906,11 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
     sheetName: string, skipHeaders = false): SheetTensor[T] =
   ## read excel for scitific calculate
   runnableExamples:
-    let data = readExcel[int]("tests/test_int.xlsx", skipHeaders = false)
-    assert(data[sheetName].data == @[1, 4, 7, 9, 4, 7, 1, 3, 12, 54, 24, 887])
-  
+    let sheetName = "Sheet1"
+    let data = readExcel[int]("tests/test_int.xlsx", sheetName,
+        skipHeaders = false)
+    assert(data.data == @[1, 4, 7, 9, 4, 7, 1, 3, 12, 54, 24, 887])
+
   # for arraymancy https://github.com/mratsim/Arraymancer/blob/master/src/io/io_csv.nim
   extractXml(fileName)
   defer: removeDir(TempDir)
