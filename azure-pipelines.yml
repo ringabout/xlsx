@@ -143,6 +143,11 @@ steps:
   # We need to set PATH in the collector for the next tast
   # and also update it within this task with export
   - bash: |
+      brew update
+      brew install libzip
+    displayName: 'install libzip.dynlib (MacOS)'
+    condition: eq(variables['Agent.OS'], 'Darwin')
+  - bash: |
       echo "##vso[task.prependpath]$PWD/NimBinaries/nim-${CHANNEL}/bin"
     displayName: 'Set env variable (Posix)'
     condition: ne(variables['Agent.OS'], 'Windows_NT')
