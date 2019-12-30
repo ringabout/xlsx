@@ -154,7 +154,7 @@ steps:
   - bash: |
       echo "PATH=${PATH}"
       nimble refresh
-      nimble install xlsx
+      nimble install zip
     displayName: 'Building the package dependencies (Posix)'
     condition: ne(variables['Agent.OS'], 'Windows_NT')
   - powershell: |
@@ -164,7 +164,7 @@ steps:
   - powershell: |
       echo $Env:Path
       nimble refresh
-      nimble install xlsx
+      nimble install zip
     displayName: 'Building the package dependencies (Windows)'
     condition: eq(variables['Agent.OS'], 'Windows_NT')
   - bash: |

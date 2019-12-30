@@ -9,7 +9,7 @@ matrix:
   include:
     # Build and test against the master (stable) and devel branches of Nim
     - os: linux
-      env: CHANNEL=devel
+      env: CHANNEL=stable
       compiler: gcc
 
     # On OSX we only test against clang (gcc is mapped to clang by default)
