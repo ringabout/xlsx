@@ -3,7 +3,7 @@ Parse xlsx written in Nim.[WIP]
 
 ### Docs
 
-Docs in https://xflywind.github.io/xlsx/xlsx.html
+Docs in https://xflywind.github.io/xlsx/utils.html
 
 ### Usage
 
