@@ -25,6 +25,7 @@ task docs, "Generate docs":
 
   exec "nim doc2 " & 
     "--git.commit:master " &
+    "--index:on " &
     "--git.devel:master " &
     "--git.url:https://github.com/xflywind/xlsx " &
     "-o:docs/xlsx.html " &

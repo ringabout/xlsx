@@ -10,7 +10,7 @@ let TempDir* = getTempDir() / "xlsx_windx_tmp"
 
 
 type
-  XlsxError* = object of Exception
+  XlsxError* = object of Exception 
   NotExistsXlsxFileError* = object of XlsxError
   InvalidXlsxFileError* = object of XlsxError
   NotFoundSheetError* = object of XlsxError
@@ -46,7 +46,7 @@ type
   Sheet = object
     info: SheetInfo
     data: seq[SheetData]
-  SheetArray* = object
+  SheetArray* = object ## SheetArray
     shape*: tuple[rows: int, cols: int]
     data*: seq[string]
     header*: bool
