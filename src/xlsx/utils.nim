@@ -64,10 +64,10 @@ proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
   ## Extract xml file from excel using zip,
   ## default path is TempDir.
   if not existsFile(src):
-    raise newException(NotExistsXlsxFileError, "No such file: " & src)
+    raise newException(NotExistsXlsxFileError, "No such file: $#" % src)
   var z: ZipArchive
   if not z.open(src):
-    raise newException(InvalidXlsxFileError, "[ZIP] Can't open file: " & src)
+    raise newException(InvalidXlsxFileError, "[ZIP] Can't open file: $#" % src)
   z.extractAll(dest)
   z.close()
 
@@ -86,7 +86,7 @@ proc matchKindName(x: XmlParser, kind: XmlEventKind, name: string): bool {.inlin
 proc parseContentTypes(fileName: string): ContentTypes =
   # open xml file
   var s = newFileStream(fileName, fmRead)
-  if s == nil: quit("cannot open the file" & fileName)
+  if s == nil: quit("cannot open the file $#" % fileName)
   var x: XmlParser
   open(x, s, fileName)
   defer: x.close()
@@ -154,7 +154,7 @@ proc parseStringTable(x: var XmlParser, res: var seq[string]) =
 proc parseSharedString(fileName: string): SharedStrings =
   # open xml file
   var s = newFileStream(fileName, fmRead)
-  if s == nil: quit("cannot open the file" & fileName)
+  if s == nil: quit("cannot open the file $#" % fileName)
   var x: XmlParser
   open(x, s, fileName, {reportWhitespace})
   defer: x.close()
@@ -189,7 +189,7 @@ proc parseSharedString(fileName: string): SharedStrings =
 proc parseWorkBook(fileName: string): WorkBook =
   # open xml file
   var s = newFileStream(fileName, fmRead)
-  if s == nil: quit("cannot open the file" & fileName)
+  if s == nil: quit("cannot open the file $#" % fileName)
   var x: XmlParser
   open(x, s, fileName)
   defer: x.close()
@@ -461,7 +461,7 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
         discard
   else:
     value = SheetData(kind: sdk.Error, error: "error")
-    # raise newException(XlsxError, "not support " & $kind)
+    # raise newException(XlsxError, "not support $#" % $kind)
   result = (pos, value)
 
 proc parseRowData(x: var XmlParser, s: var Sheet) =
@@ -482,7 +482,7 @@ proc parseRowData(x: var XmlParser, s: var Sheet) =
 proc parseSheet(fileName: string): Sheet =
   # open xml file
   var s = newFileStream(fileName, fmRead)
-  if s == nil: quit("cannot open the file" & fileName)
+  if s == nil: quit("cannot open the file $#" % fileName)
   var x: XmlParser
   defer: x.close()
   open(x, s, fileName, {reportWhitespace})
@@ -649,16 +649,16 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
 
   if sheetName == "":
     for key, value in workbook.pairs:
-      let sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
+      let sheet = parseSheet(TempDir / contentTypes["sheet$#" % $value])
       result.data[key] = getSheetArray(sheet, sharedString, header, skipHeaders)
     return
 
   if sheetName notin workbook:
-    raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
+    raise newException(NotFoundSheetError, "no such sheet name: $#" % sheetName)
 
   let
     value = workbook[sheetName]
-    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
+    sheet = parseSheet(TempDir / contentTypes["sheet$#" % $value])
   result.data[sheetName] = getSheetArray(sheet, sharedString, header, skipHeaders)
 
 iterator lines*(fileName: string, sheetName: string): string =
@@ -677,11 +677,11 @@ iterator lines*(fileName: string, sheetName: string): string =
     sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"])
 
   if sheetName notin workbook:
-    raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
+    raise newException(NotFoundSheetError, "no such sheet name: $#" % sheetName)
 
   let
     value = workbook[sheetName]
-    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
+    sheet = parseSheet(TempDir / contentTypes["sheet$#" % $value])
 
   for item in get(sheet, sharedString):
     yield item
@@ -714,7 +714,8 @@ proc `$`*(s: SheetArray): string =
       let item = s.data[i * cols + j]
       res.add alignLeft(item[0 ..< min(width, item.len)], width)
       res.add "|"
-    result.add res & "\n"
+    result.add res
+    result.add "\n" 
     if header:
       result.add plotSym(cols)
       header = false
@@ -760,7 +761,8 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
           item = s.data[i * cols + j]
           res.add alignLeft(item[0 ..< min(width, item.len)], width)
         res.add "|"
-      result.add res & "\n"
+      result.add res
+      result.add "\n"
       if header:
         result.add plotSym(succ(cmax), width)
         header = false
@@ -782,7 +784,8 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
           item = s.data[i * cols + j]
           res.add alignLeft(item[0 ..< min(width, item.len)], width)
         res.add "|"
-      result.add res & "\n"
+      result.add res
+      result.add "\n"
       if header:
         result.add plotSym(cols, width)
         header = false
@@ -807,7 +810,8 @@ proc show*(s: SheetArray, rmax = 20, cmax = 5, width = 10) =
         item = s.data[i * cols + j]
         res.add alignLeft(item[0 ..< min(width, item.len)], width)
       res.add "|"
-    result.add res & "\n"
+    result.add res
+    result.add "\n"
     if header:
       result.add plotSym(succ(cmax), width)
       header = false
@@ -938,11 +942,11 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
     sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"])
 
   if sheetName notin workbook:
-    raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
+    raise newException(NotFoundSheetError, "no such sheet name: $#" % sheetName)
 
   let
     value = workbook[sheetName]
-    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
+    sheet = parseSheet(TempDir / contentTypes["sheet$#" % $value])
 
   result = getSheetTensor[T](sheet, sharedString, skipHeaders)
 
@@ -954,7 +958,7 @@ when isMainModule:
     data = parseExcel(excel, sheetName = sheetName, header = true,
         skipHeaders = false)
 
-  discard data
+  data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   for i in lines("../../tests/test.xlsx", "Sheet2"):
     echo i
