@@ -19,7 +19,7 @@ type
   SheetDataKind* {.pure.} = enum
     Initial, Boolean, Date, Error, InlineStr, Num, SharedString, Formula
   sdk = SheetDataKind
-  WorkBook = object 
+  WorkBook = object
     data: Table[string, string]
     date1904: bool
   ContentTypes = Table[string, string]
@@ -60,8 +60,8 @@ type
   SheetTable* = object
     data*: Table[string, SheetArray]
 
-
-{.passl: "-lz".}
+when defined(windows):
+  {.passl: "-lz".}
 
 proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
   ## Extract xml file from excel using zip,
@@ -228,13 +228,12 @@ proc parseDateInWorkBook(x: var XmlParser): bool =
     x.next()
     case x.kind
     of xmlAttribute:
-      if x.attrKey =?= "date1904" and x.attrValue == "1":
+      if x.attrKey =?= "date1904" and parseBool(x.attrValue):
         result = true
     of xmlElementEnd, xmlEof:
       break
     else:
       discard
-
 
 proc parseWorkBook(fileName: string): WorkBook =
   # open xml file
@@ -1006,7 +1005,8 @@ when isMainModule:
     data = parseExcel(excel, sheetName = sheetName, header = true,
         skipHeaders = false, escapeStrings = true)
 
-  data[sheetName].show(width = 20)
+  discard data
+  # data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   for i in lines("../../tests/test.xlsx", "Sheet2", skipEmptyLines = true):
     echo i
