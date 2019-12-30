@@ -673,7 +673,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   result.data[sheetName] = getSheetArray(sheet, sharedString, header, skipHeaders)
 
 iterator lines*(fileName: string, sheetName: string,
-    escapeStrings = false): string =
+    escapeStrings = false, skipEmptyLines = false): string =
   ## return lines of xlsx
   runnableExamples:
     for i in lines("tests/test.xlsx", "Sheet2"):
@@ -697,6 +697,8 @@ iterator lines*(fileName: string, sheetName: string,
     sheet = parseSheet(TempDir / contentTypes["sheet$#" % $value])
 
   for item in get(sheet, sharedString):
+    if skipEmptyLines and len(item) == 0:
+      continue
     yield item
 
 proc `[]`*(s: SheetArray, i, j: Natural): string {.inline.} =
@@ -972,10 +974,9 @@ when isMainModule:
     data = parseExcel(excel, sheetName = sheetName, header = true,
         skipHeaders = false, escapeStrings = true)
 
-  echo data[sheetName].data
   data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
-  for i in lines("../../tests/test.xlsx", "Sheet2"):
+  for i in lines("../../tests/test.xlsx", "Sheet2", skipEmptyLines = true):
     echo i
 
   echo parseAllSheetName("../../tests/test_int.xlsx")
