@@ -6,11 +6,12 @@ import zip / zipfiles
 const
   UpperLetters = {'A' .. 'Z'}
   CharDataOption = {xmlCharData, xmlWhitespace}
+  DEFAULT_WORKBOOK_PATH = "xl/workbook.xml"
 let TempDir* = getTempDir() / "xlsx_windx_tmp"
 
 
 type
-  XlsxError* = object of Exception 
+  XlsxError* = object of Exception
   NotExistsXlsxFileError* = object of XlsxError
   InvalidXlsxFileError* = object of XlsxError
   NotFoundSheetError* = object of XlsxError
@@ -84,6 +85,7 @@ proc matchKindName(x: XmlParser, kind: XmlEventKind, name: string): bool {.inlin
   x.kind == kind and x.elementName =?= name
 
 proc parseContentTypes(fileName: string): ContentTypes =
+  # TODO maybe add namespaceUri
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file $#" % fileName)
@@ -120,7 +122,12 @@ proc parseContentTypes(fileName: string): ContentTypes =
     else:
       discard
 
-proc parseStringTable(x: var XmlParser, res: var seq[string]) =
+  let workBookKey = "workbook"
+  if workBookKey notin result or result[workBookKey] == "":
+    result[workBookKey] = DEFAULT_WORKBOOK_PATH
+
+proc parseStringTable(x: var XmlParser, res: var seq[string],
+    escapeStrings: bool) =
   var count = 0
   while true:
     # match <si>
@@ -138,6 +145,9 @@ proc parseStringTable(x: var XmlParser, res: var seq[string]) =
           while x.kind in CharDataOption:
             res[count] &= x.charData
             x.next()
+          # escape strings
+          if escapeStrings:
+            res[count] = escape(res[count])
           # seq index
           inc(count)
           # if match chardata, end loop
@@ -151,7 +161,7 @@ proc parseStringTable(x: var XmlParser, res: var seq[string]) =
       discard
     x.next()
 
-proc parseSharedString(fileName: string): SharedStrings =
+proc parseSharedString(fileName: string, escapeStrings = false): SharedStrings =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("cannot open the file $#" % fileName)
@@ -177,7 +187,7 @@ proc parseSharedString(fileName: string): SharedStrings =
               result = newSeq[string](parseInt(x.attrValue))
           of xmlElementStart:
             # match <si>, then parse StringTable
-            x.parseStringTable(result)
+            x.parseStringTable(result, escapeStrings)
             break
           else:
             discard
@@ -628,7 +638,7 @@ proc parseAllSheetName*(fileName: string): seq[string] {.inline.} =
     result.add(key)
 
 proc parseExcel*(fileName: string, sheetName = "", header = false,
-    skipHeaders = false): SheetTable =
+    skipHeaders = false, escapeStrings = false): SheetTable =
   ## parse excel and return SheetTable which contains
   ## all sheetArray.
   runnableExamples:
@@ -645,7 +655,8 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
 
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
-    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"])
+    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"],
+        escapeStrings = escapeStrings)
 
   if sheetName == "":
     for key, value in workbook.pairs:
@@ -661,7 +672,8 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     sheet = parseSheet(TempDir / contentTypes["sheet$#" % $value])
   result.data[sheetName] = getSheetArray(sheet, sharedString, header, skipHeaders)
 
-iterator lines*(fileName: string, sheetName: string): string =
+iterator lines*(fileName: string, sheetName: string,
+    escapeStrings = false): string =
   ## return lines of xlsx
   runnableExamples:
     for i in lines("tests/test.xlsx", "Sheet2"):
@@ -674,7 +686,8 @@ iterator lines*(fileName: string, sheetName: string): string =
 
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
-    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"])
+    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"],
+        escapeStrings = escapeStrings)
 
   if sheetName notin workbook:
     raise newException(NotFoundSheetError, "no such sheet name: $#" % sheetName)
@@ -715,7 +728,7 @@ proc `$`*(s: SheetArray): string =
       res.add alignLeft(item[0 ..< min(width, item.len)], width)
       res.add "|"
     result.add res
-    result.add "\n" 
+    result.add "\n"
     if header:
       result.add plotSym(cols)
       header = false
@@ -872,7 +885,7 @@ proc toSeq*(s: SheetArray, skipHeaders = false): seq[seq[string]] {.inline.} = #
     else:
       cCount += 1
 
-proc parseData*[T](x: sink string): T {.inline.} = 
+proc parseData*[T](x: sink string): T {.inline.} =
   when T is SomeSignedInt:
     try:
       result = T(x.parseInt)
@@ -921,7 +934,7 @@ proc getSheetTensor[T](s: Sheet, str: SharedStrings,
     result.data = result.data
 
 proc readExcel*[T: SomeNumber|bool|string](fileName: string,
-    sheetName: string, skipHeaders = false): SheetTensor[T] =
+    sheetName: string, skipHeaders = false, escapeStrings = false): SheetTensor[T] =
   ## read excel for scientific calculation
   # for arraymancy https://github.com/mratsim/Arraymancer/blob/master/src/io
   runnableExamples:
@@ -939,7 +952,8 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
 
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
-    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"])
+    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"],
+        escapeStrings = escapeStrings)
 
   if sheetName notin workbook:
     raise newException(NotFoundSheetError, "no such sheet name: $#" % sheetName)
@@ -956,8 +970,9 @@ when isMainModule:
     sheetName = "sheet2"
     excel = "../../tests/nim.xlsx"
     data = parseExcel(excel, sheetName = sheetName, header = true,
-        skipHeaders = false)
+        skipHeaders = false, escapeStrings = true)
 
+  echo data[sheetName].data
   data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   for i in lines("../../tests/test.xlsx", "Sheet2"):
