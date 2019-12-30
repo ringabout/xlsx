@@ -1,6 +1,8 @@
 import os, streams, parsexml, parseutils, tables, times, strutils
+import format
 
 import zip / zipfiles
+
 
 
 const
@@ -392,6 +394,11 @@ proc parseDataKind(s: string): SheetDataKind {.inline.} =
   else:
     raise newException(UnKnownSheetDataKindError, "unsupport sheet data kind")
 
+proc parseAttr(s: string): SheetDataKind {.inline, used.} =
+  # TODO parse styles
+  var kind {.used.} = parseInt(s)
+  discard
+
 proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
   # <c r="A2" t="s">
   var
@@ -402,12 +409,15 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
     x.next()
     case x.kind
     of xmlAttribute:
+      case x.attrKey
       # catch key "r"
-      if x.attrKey =?= "r":
+      of "r":
         pos = parsePos(x.attrValue, s)
       # catch key "t"
-      elif x.attrKey =?= "t":
+      of "t":
         kind = parseDataKind(x.attrValue)
+      of "s":
+        kind = parseAttr(x.attrValue) 
     of xmlElementClose, xmlEof:
       break
     else:
@@ -573,7 +583,7 @@ proc parseSheet(fileName: string): Sheet =
 proc getKindString(item: SheetData, str: SharedStrings): string {.inline.} =
   case item.kind
   of sdk.Boolean:
-    result = item.bvalue
+    result = $parseBool(item.bvalue)
   of sdk.SharedString:
     result = str[parseInt(item.svalue)]
   of sdk.Num:
