@@ -28,7 +28,7 @@ task docs, "Generate docs":
     "--index:on " &
     "--git.devel:master " &
     "--git.url:https://github.com/xflywind/xlsx " &
-    "-o:docs/xlsx.html " &
+    "-o:docs/utils.html " &
     "src/xlsx/utils.nim"
 
   
