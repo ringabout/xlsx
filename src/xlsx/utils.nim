@@ -26,6 +26,10 @@ type
     date1904: bool
   ContentTypes = Table[string, string]
   SharedStrings = seq[string]
+  Styles = object
+    numFmts: TableRef[string, string]
+    cellXfs: seq[string]
+
   SheetData = object
     case kind: SheetDataKind
     of sdk.Boolean:
@@ -200,6 +204,118 @@ proc parseSharedString(fileName: string, escapeStrings = false): SharedStrings =
     else:
       discard
 
+
+# TODO Maybe TableRef
+proc parseNumFmts(x: var XmlParser): TableRef[string, string] =
+  # -> parse numFmts
+  # <numFmts count="2">
+  # <numFmt formatCode="dd"-"mm"-"yyyy" "hh:mm:ss" numFmtId="176"/>
+  # <numFmt formatCode="hh:mm:ss" numFmtId="177"/>
+  # </numFmts>
+  new result
+  while true:
+    x.next()
+    case x.kind
+    of xmlElementOpen:
+      if x.elementName =?= "numFmt":
+        var key, value: string
+        while true:
+          x.next()
+          case x.kind
+          of xmlAttribute:
+            if x.attrKey =?= "numFmtId":
+              key = x.attrValue
+            elif x.attrKey =?= "formatCode":
+              value = x.attrValue.toLower
+          of xmlElementEnd:
+            result[key] = value 
+            break
+          of xmlEof:
+            # Maybe raise error
+            break
+          else:
+            discard
+    of xmlElementEnd:
+      if x.elementName =?= "numFmts":
+        break
+    of xmlEof:
+      break
+    else:
+      discard
+
+proc parseCellXfs(x: var XmlParser, count: int): seq[string] =
+  # -> parse cellXfs
+  # <cellXfs count="6">
+  # <xf numFmtId="0" borderId="0" fillId="0" fontId="0" xfId="0"/>
+  # <xf numFmtId="14" borderId="0" fillId="0" fontId="0" xfId="0" applyNumberFormat="1"/>
+  # <xf numFmtId="177" borderId="1" fillId="2" fontId="0" xfId="0" applyNumberFormat="1" applyBorder="1" applyFill="1"/>
+  # </cellXfs>
+  # open xml file
+  result = newSeqOfCap[string](count)
+  while true:
+    x.next()
+    case x.kind
+    of xmlElementOpen:
+      if x.elementName =?= "xf":
+        while true:
+          x.next()
+          case x.kind
+          of xmlAttribute:
+            if x.attrKey =?= "numFmtId":
+              result.add x.attrValue
+          of xmlElementEnd:
+            break
+          of xmlEof:
+            # Maybe raise error
+            break
+          else:
+            discard
+    of xmlElementEnd:
+      if x.elementName =?= "cellXfs":
+        break
+    of xmlEof:
+      break
+    else:
+      discard
+
+
+
+proc parseStyles(fileName: string): Styles {.inline.} =
+  # parse numFmts and cellXfs
+  var s = newFileStream(fileName, fmRead)
+  if s == nil: quit("Unable to read file: " & fileName)
+  var x: XmlParser
+  open(x, s, fileName, {reportWhitespace})
+  defer: x.close()
+
+  # open xml file
+  while true:
+    x.next()
+    case x.kind
+    of xmlElementOpen:
+      # <numFmts
+      if x.elementName =?= "numFmts":
+        result.numFmts = x.parseNumFmts
+      elif x.elementName =?= "cellXfs":
+        var count: string
+        while true:
+          x.next()
+          case x.kind
+          of xmlAttribute:
+            if x.attrKey =?= "count":
+              count = x.attrValue
+          of xmlElementClose, xmlEof:
+            break
+          else:
+            discard
+        result.cellXfs = x.parseCellXfs(count.parseInt)
+    of xmlEof:
+      break # end the world
+    else:
+      discard
+
+
+
 proc parseSheetNameInWorkBook(x: var XmlParser): Table[string, string] =
   var name: string
 
@@ -244,7 +360,6 @@ proc parseWorkBook(fileName: string): WorkBook =
   var x: XmlParser
   open(x, s, fileName)
   defer: x.close()
-
 
   while true:
     x.next()
@@ -394,10 +509,9 @@ proc parseDataKind(s: string): SheetDataKind {.inline.} =
   else:
     raise newException(UnKnownSheetDataKindError, "unsupport sheet data kind")
 
-proc parseAttr(s: string): SheetDataKind {.inline, used.} =
-  # TODO parse styles
-  var kind {.used.} = parseInt(s)
+proc parseAttr(s: string): SheetDataKind {.inline.} =
   discard
+
 
 proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
   # <c r="A2" t="s">
@@ -693,6 +807,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   let
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = parseWorkBook(TempDir / contentTypes["workbook"])
+    styles = parseStyles(TempDir / contentTypes["styles"])
 
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
@@ -1010,17 +1125,17 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
 
 when isMainModule:
   let
-    sheetName = "sheet2"
-    excel = "../../tests/nim.xlsx"
-    data = parseExcel(excel, sheetName = sheetName, header = true,
+    sheetName = "Sheet1"
+    excel = "../../tests/test_dateTime.xlsx"
+    data = parseExcel(excel, sheetName = sheetName, header = false,
         skipHeaders = false, escapeStrings = true)
-
-  discard data
+  
+  discard data[sheetName]
   # data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
-  for i in lines("../../tests/test.xlsx", "Sheet2", skipEmptyLines = true):
-    echo i
+  # for i in lines("../../tests/test.xlsx", "Sheet2", skipEmptyLines = true):
+  #   echo i
 
-  echo parseAllSheetName("../../tests/test_int.xlsx")
+  # echo parseAllSheetName("../../tests/test_int.xlsx")
 
-  echo readExcel[float]("../../tests/test_int.xlsx", "Sheet1")
+  # echo readExcel[float]("../../tests/test_int.xlsx", "Sheet1")
