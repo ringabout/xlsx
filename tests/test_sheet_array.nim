@@ -2,7 +2,7 @@ import unittest
 
 import xlsx
 
-suite "Test process Excel":
+suite "Test SheetArray":
   let sheetName = "Sheet2"
 
   test "Get one element from SheetArray":

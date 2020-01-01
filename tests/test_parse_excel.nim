@@ -21,5 +21,5 @@ suite "Test parse Excel":
     check(data == @["Sheet1", "Sheet2"])
 
   test "Read Excel by lines":
-    for i in lines("tests/test.xlsx", "Sheet2"):
-      discard i
+    for line in lines("tests/test.xlsx", "Sheet2"):
+      discard line

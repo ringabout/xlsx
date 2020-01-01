@@ -69,10 +69,10 @@ proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
   ## Extract xml file from excel using zip,
   ## default path is TempDir.
   if not existsFile(src):
-    raise newException(NotExistsXlsxFileError, "No such file: $#" % src)
+    raise newException(NotExistsXlsxFileError, "No such xlsx file: " & src)
   var z: ZipArchive
   if not z.open(src):
-    raise newException(InvalidXlsxFileError, "[ZIP] Can't open file: $#" % src)
+    raise newException(InvalidXlsxFileError, "[ZIP] Can't open xlsx file: " & src)
   z.extractAll(dest)
   z.close()
 
@@ -92,7 +92,7 @@ proc parseContentTypes(fileName: string): ContentTypes =
   # TODO maybe add namespaceUri
   # open xml file
   var s = newFileStream(fileName, fmRead)
-  if s == nil: quit("cannot open the file $#" % fileName)
+  if s == nil: quit("Unable to read file: " & fileName)
   var x: XmlParser
   open(x, s, fileName)
   defer: x.close()
@@ -168,7 +168,7 @@ proc parseStringTable(x: var XmlParser, res: var seq[string],
 proc parseSharedString(fileName: string, escapeStrings = false): SharedStrings =
   # open xml file
   var s = newFileStream(fileName, fmRead)
-  if s == nil: quit("cannot open the file $#" % fileName)
+  if s == nil: quit("Unable to read file: " & fileName)
   var x: XmlParser
   open(x, s, fileName, {reportWhitespace})
   defer: x.close()
@@ -240,7 +240,7 @@ proc parseDateInWorkBook(x: var XmlParser): bool =
 proc parseWorkBook(fileName: string): WorkBook =
   # open xml file
   var s = newFileStream(fileName, fmRead)
-  if s == nil: quit("cannot open the file $#" % fileName)
+  if s == nil: quit("Unable to read file: " & fileName)
   var x: XmlParser
   open(x, s, fileName)
   defer: x.close()
@@ -417,7 +417,7 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
       of "t":
         kind = parseDataKind(x.attrValue)
       of "s":
-        kind = parseAttr(x.attrValue) 
+        kind = parseAttr(x.attrValue)
     of xmlElementClose, xmlEof:
       break
     else:
@@ -512,7 +512,7 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
         discard
   else:
     value = SheetData(kind: sdk.Error, error: "error")
-    # raise newException(XlsxError, "not support $#" % $kind)
+    # raise newException(XlsxError, "not support " & $kind)
   result = (pos, value)
 
 proc parseRowData(x: var XmlParser, s: var Sheet) =
@@ -533,7 +533,7 @@ proc parseRowData(x: var XmlParser, s: var Sheet) =
 proc parseSheet(fileName: string): Sheet =
   # open xml file
   var s = newFileStream(fileName, fmRead)
-  if s == nil: quit("cannot open the file $#" % fileName)
+  if s == nil: quit("Unable to read file: " & fileName)
   var x: XmlParser
   defer: x.close()
   open(x, s, fileName, {reportWhitespace})
@@ -701,16 +701,16 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
 
   if sheetName == "":
     for key, value in workbook.data.pairs:
-      let sheet = parseSheet(TempDir / contentTypes["sheet$#" % $value])
+      let sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
       result.data[key] = getSheetArray(sheet, sharedString, header, skipHeaders)
     return
 
   if sheetName notin workbook.data:
-    raise newException(NotFoundSheetError, "no such sheet name: $#" % sheetName)
+    raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
 
   let
     value = workbook.data[sheetName]
-    sheet = parseSheet(TempDir / contentTypes["sheet$#" % $value])
+    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
   result.data[sheetName] = getSheetArray(sheet, sharedString, header, skipHeaders)
 
 iterator lines*(fileName: string, sheetName: string,
@@ -731,11 +731,11 @@ iterator lines*(fileName: string, sheetName: string,
         escapeStrings = escapeStrings)
 
   if sheetName notin workbook.data:
-    raise newException(NotFoundSheetError, "no such sheet name: $#" % sheetName)
+    raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
 
   let
     value = workbook.data[sheetName]
-    sheet = parseSheet(TempDir / contentTypes["sheet$#" % $value])
+    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
 
   for item in get(sheet, sharedString):
     if skipEmptyLines and len(item) == 0:
@@ -982,7 +982,7 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
   # for arraymancy https://github.com/mratsim/Arraymancer/blob/master/src/io
   runnableExamples:
     let sheetName = "Sheet1"
-    let data = readExcel[int]("tests/test_int.xlsx", sheetName,
+    let data = readExcel[int]("tests/test_read_excel.xlsx", sheetName,
         skipHeaders = false)
     # if missing value, will fill default value of T
     assert(data.data == @[1, 4, 7, 9, 4, 7, 0, 3, 12, 54, 24, 887])
@@ -999,11 +999,11 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
         escapeStrings = escapeStrings)
 
   if sheetName notin workbook.data:
-    raise newException(NotFoundSheetError, "no such sheet name: $#" % sheetName)
+    raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
 
   let
     value = workbook.data[sheetName]
-    sheet = parseSheet(TempDir / contentTypes["sheet$#" % $value])
+    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
 
   result = getSheetTensor[T](sheet, sharedString, skipHeaders)
 

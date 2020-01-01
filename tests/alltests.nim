@@ -6,4 +6,4 @@
 # To run these tests, simply execute `nimble test`.
 
 {.warnings: off.}
-import test_parse, test_process, test_calculate
+import test_parse_excel, test_sheet_array, test_read_excel

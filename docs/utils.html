@@ -824,6 +824,12 @@ function main() {
   </div>
   <ul class="simple simple-toc" id="toc-list">
 <li>
+  <a class="reference reference-toplevel" href="#6" id="56">Imports</a>
+  <ul class="simple simple-toc-section">
+    
+  </ul>
+</li>
+<li>
   <a class="reference reference-toplevel" href="#7" id="57">Types</a>
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#XlsxError"
@@ -919,33 +925,16 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc"></p>
-  <div class="section" id="7">
+  <div class="section" id="6">
+<h1><a class="toc-backref" href="#6">Imports</a></h1>
+<dl class="item">
+<a class="reference external" href="format.html">format</a>
+</dl></div>
+<div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
 <dl class="item">
 <a id="XlsxError"></a>
 <dt><pre><a href="utils.html#XlsxError"><span class="Identifier">XlsxError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">Exception</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L14"
-class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L14" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="NotExistsXlsxFileError"></a>
-<dt><pre><a href="utils.html#NotExistsXlsxFileError"><span class="Identifier">NotExistsXlsxFileError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="utils.html#XlsxError"><span class="Identifier">XlsxError</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L15"
-class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L15" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="InvalidXlsxFileError"></a>
-<dt><pre><a href="utils.html#InvalidXlsxFileError"><span class="Identifier">InvalidXlsxFileError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="utils.html#XlsxError"><span class="Identifier">XlsxError</span></a></pre></dt>
 <dd>
 
 
@@ -955,8 +944,8 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L16" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="NotFoundSheetError"></a>
-<dt><pre><a href="utils.html#NotFoundSheetError"><span class="Identifier">NotFoundSheetError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="utils.html#XlsxError"><span class="Identifier">XlsxError</span></a></pre></dt>
+<a id="NotExistsXlsxFileError"></a>
+<dt><pre><a href="utils.html#NotExistsXlsxFileError"><span class="Identifier">NotExistsXlsxFileError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="utils.html#XlsxError"><span class="Identifier">XlsxError</span></a></pre></dt>
 <dd>
 
 
@@ -966,8 +955,8 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L17" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="UnKnownSheetDataKindError"></a>
-<dt><pre><a href="utils.html#UnKnownSheetDataKindError"><span class="Identifier">UnKnownSheetDataKindError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="utils.html#XlsxError"><span class="Identifier">XlsxError</span></a></pre></dt>
+<a id="InvalidXlsxFileError"></a>
+<dt><pre><a href="utils.html#InvalidXlsxFileError"><span class="Identifier">InvalidXlsxFileError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="utils.html#XlsxError"><span class="Identifier">XlsxError</span></a></pre></dt>
 <dd>
 
 
@@ -977,9 +966,8 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L18" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="SheetDataKind"></a>
-<dt><pre><a href="utils.html#SheetDataKind"><span class="Identifier">SheetDataKind</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">pure</span></span><span class="Other">.}</span></span> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">Initial</span><span class="Other">,</span> <span class="Identifier">Boolean</span><span class="Other">,</span> <span class="Identifier">Date</span><span class="Other">,</span> <span class="Identifier">Error</span><span class="Other">,</span> <span class="Identifier">InlineStr</span><span class="Other">,</span> <span class="Identifier">Num</span><span class="Other">,</span> <span class="Identifier">SharedString</span><span class="Other">,</span> <span class="Identifier">Formula</span></pre></dt>
+<a id="NotFoundSheetError"></a>
+<dt><pre><a href="utils.html#NotFoundSheetError"><span class="Identifier">NotFoundSheetError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="utils.html#XlsxError"><span class="Identifier">XlsxError</span></a></pre></dt>
 <dd>
 
 
@@ -987,6 +975,29 @@ class="link-seesrc" target="_blank">Source</a>
 href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L19"
 class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L19" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="UnKnownSheetDataKindError"></a>
+<dt><pre><a href="utils.html#UnKnownSheetDataKindError"><span class="Identifier">UnKnownSheetDataKindError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="utils.html#XlsxError"><span class="Identifier">XlsxError</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L20"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L20" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="SheetDataKind"></a>
+<dt><pre><a href="utils.html#SheetDataKind"><span class="Identifier">SheetDataKind</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">pure</span></span><span class="Other">.}</span></span> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">Initial</span><span class="Other">,</span> <span class="Identifier">Boolean</span><span class="Other">,</span> <span class="Identifier">Date</span><span class="Other">,</span> <span class="Identifier">Error</span><span class="Other">,</span> <span class="Identifier">InlineStr</span><span class="Other">,</span> <span class="Identifier">Num</span><span class="Other">,</span> <span class="Identifier">SharedString</span><span class="Other">,</span> <span class="Identifier">Formula</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L21"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L21" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="SheetArray"></a>
@@ -1000,9 +1011,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 SheetArray
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L50"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L54"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L50" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L54" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="SheetTensor"></a>
@@ -1014,9 +1025,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L55"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L59"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L55" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L59" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="SheetTable"></a>
@@ -1027,9 +1038,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L58"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L62"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L58" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L62" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1043,9 +1054,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L10"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L12"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L10" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L12" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1055,36 +1066,35 @@ class="link-seesrc" target="_blank">Source</a>
 <dl class="item">
 <a id="extractXml,string,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#extractXml%2Cstring%2Cstring"><span class="Identifier">extractXml</span></a><span class="Other">(</span><span class="Identifier">src</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">dest</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Other">=</span> <span class="Identifier">TempDir</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">NotExistsXlsxFileError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">NotExistsXlsxFileError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Extract xml file from excel using zip, default path is TempDir.
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L64"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L68"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L64" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L68" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseAllSheetName,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#parseAllSheetName%2Cstring"><span class="Identifier">parseAllSheetName</span></a><span class="Other">(</span><span class="Identifier">fileName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">NotExistsXlsxFileError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">NotExistsXlsxFileError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span>
+    <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 get all sheet name
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L628"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L669"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L628" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L669" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseExcel,string,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#parseExcel%2Cstring%2Cstring"><span class="Identifier">parseExcel</span></a><span class="Other">(</span><span class="Identifier">fileName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">header</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
                <span class="Identifier">escapeStrings</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="utils.html#SheetTable"><span class="Identifier">SheetTable</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">NotExistsXlsxFileError</span><span class="Other">,</span>
-    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span>
+    <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span>
     <span class="Identifier">UnKnownSheetDataKindError</span><span class="Other">,</span> <span class="Identifier">NotFoundSheetError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
@@ -1096,9 +1106,9 @@ parse excel and return SheetTable which contains all sheetArray.
   <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="StringLit">&quot;Sheet2&quot;</span>
 <span class="Identifier">echo</span> <span class="Identifier">data</span><span class="Other">[</span><span class="Identifier">sheetName</span><span class="Other">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L640"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L681"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L640" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L681" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[],SheetArray,Natural,Natural"></a>
@@ -1107,9 +1117,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L704"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L745"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L704" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L745" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[]=,SheetArray,Natural,Natural,string"></a>
@@ -1119,9 +1129,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L710"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L751"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L710" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L751" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="$,SheetArray"></a>
@@ -1130,9 +1140,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 display SheetArray
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L719"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L760"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L719" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L760" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="show,SheetArray,int,int,int"></a>
@@ -1147,9 +1157,9 @@ display SheetArray with more control
   <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">parseExcel</span><span class="Other">(</span><span class="Identifier">excel</span><span class="Other">,</span> <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="Identifier">sheetName</span><span class="Other">,</span> <span class="Identifier">header</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">,</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span>
 <span class="Identifier">data</span><span class="Other">[</span><span class="Identifier">sheetName</span><span class="Other">]</span><span class="Other">.</span><span class="Identifier">show</span><span class="Other">(</span><span class="Identifier">width</span> <span class="Other">=</span> <span class="DecNumber">20</span><span class="Other">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L739"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L780"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L739" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L780" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toCsv,SheetArray,string,string"></a>
@@ -1163,9 +1173,9 @@ Parse SheetArray and write a Csv file
 <span class="Keyword">let</span> <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">parseExcel</span><span class="Other">(</span><span class="StringLit">&quot;tests/test.xlsx&quot;</span><span class="Other">)</span>
 <span class="Identifier">data</span><span class="Other">[</span><span class="Identifier">sheetName</span><span class="Other">]</span><span class="Other">.</span><span class="Identifier">toCsv</span><span class="Other">(</span><span class="StringLit">&quot;tests/test.csv&quot;</span><span class="Other">,</span> <span class="Identifier">sep</span> <span class="Other">=</span> <span class="StringLit">&quot;,&quot;</span><span class="Other">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L836"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L877"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L836" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L877" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toSeq,SheetArray"></a>
@@ -1181,9 +1191,9 @@ Parse SheetArray and return a seq[seq[string]]
 <span class="Keyword">for</span> <span class="Identifier">row</span> <span class="Keyword">in</span> <span class="Identifier">rows</span><span class="Other">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">row</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L854"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L895"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L854" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L895" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseData"></a>
@@ -1192,9 +1202,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L890"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L931"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L890" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L931" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="readExcel,string,string"></a>
@@ -1206,12 +1216,13 @@ class="link-seesrc" target="_blank">Source</a>
 read excel for scientific calculation
 <p><strong class="examples_text">Examples:</strong></p>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="StringLit">&quot;Sheet1&quot;</span>
-<span class="Keyword">let</span> <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">readExcel</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">(</span><span class="StringLit">&quot;tests/test_int.xlsx&quot;</span><span class="Other">,</span> <span class="Identifier">sheetName</span><span class="Other">,</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span>
+<span class="Keyword">let</span> <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">readExcel</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">(</span><span class="StringLit">&quot;tests/test_read_excel.xlsx&quot;</span><span class="Other">,</span> <span class="Identifier">sheetName</span><span class="Other">,</span>
+                       <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span>
 <span class="Identifier">assert</span><span class="Other">(</span><span class="Identifier">data</span><span class="Other">.</span><span class="Identifier">data</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Other">[</span><span class="DecNumber">1</span><span class="Other">,</span> <span class="DecNumber">4</span><span class="Other">,</span> <span class="DecNumber">7</span><span class="Other">,</span> <span class="DecNumber">9</span><span class="Other">,</span> <span class="DecNumber">4</span><span class="Other">,</span> <span class="DecNumber">7</span><span class="Other">,</span> <span class="DecNumber">0</span><span class="Other">,</span> <span class="DecNumber">3</span><span class="Other">,</span> <span class="DecNumber">12</span><span class="Other">,</span> <span class="DecNumber">54</span><span class="Other">,</span> <span class="DecNumber">24</span><span class="Other">,</span> <span class="DecNumber">887</span><span class="Other">]</span><span class="Other">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L938"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L979"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L938" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L979" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1222,7 +1233,7 @@ class="link-seesrc" target="_blank">Source</a>
 <a id="lines.i,string,string"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#lines.i%2Cstring%2Cstring"><span class="Identifier">lines</span></a><span class="Other">(</span><span class="Identifier">fileName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">sheetName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">escapeStrings</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
               <span class="Identifier">skipEmptyLines</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">NotExistsXlsxFileError</span><span class="Other">,</span>
-    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span>
+    <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span>
     <span class="Identifier">NotFoundSheetError</span><span class="Other">,</span> <span class="Identifier">UnKnownSheetDataKindError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
@@ -1232,9 +1243,9 @@ return lines of xlsx
 <pre class="listing"><span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="Identifier">lines</span><span class="Other">(</span><span class="StringLit">&quot;tests/test.xlsx&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Sheet2&quot;</span><span class="Other">)</span><span class="Other">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">i</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L675"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L716"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L675" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L716" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1248,9 +1259,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L716"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L757"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L716" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L757" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1263,7 +1274,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2019-12-30 06:56:20 UTC</small>
+        <small>Made with Nim. Generated: 2020-01-01 08:13:36 UTC</small>
       </div>
     </div>
   </div>
