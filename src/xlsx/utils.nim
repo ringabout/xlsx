@@ -18,6 +18,16 @@ type
   InvalidXlsxFileError* = object of XlsxError
   NotFoundSheetError* = object of XlsxError
   UnKnownSheetDataKindError* = object of XlsxError
+
+  # MyDateTime = tuple
+  #   year: int
+  #   month: MonthdayRange
+  #   hour: HourRange
+  #   minute: MinuteRange
+  #   second: SecondRange
+  #   nanosecond: NanosecondRange
+
+
   SheetDataKind* {.pure.} = enum
     Initial, Boolean, Date, Error, InlineStr, Num, SharedString, Formula
   sdk = SheetDataKind
@@ -26,9 +36,7 @@ type
     date1904: bool
   ContentTypes = Table[string, string]
   SharedStrings = seq[string]
-  Styles = object
-    numFmts: TableRef[string, string]
-    cellXfs: seq[string]
+  Styles = seq[string]
 
   SheetData = object
     case kind: SheetDataKind
@@ -52,6 +60,7 @@ type
   SheetInfo = tuple
     rows, cols: int
     start: string
+    date1904: bool
   Sheet = object
     info: SheetInfo
     data: seq[SheetData]
@@ -228,7 +237,7 @@ proc parseNumFmts(x: var XmlParser): TableRef[string, string] =
             elif x.attrKey =?= "formatCode":
               value = x.attrValue.toLower
           of xmlElementEnd:
-            result[key] = value 
+            result[key] = value
             break
           of xmlEof:
             # Maybe raise error
@@ -243,7 +252,8 @@ proc parseNumFmts(x: var XmlParser): TableRef[string, string] =
     else:
       discard
 
-proc parseCellXfs(x: var XmlParser, count: int): seq[string] =
+proc parseCellXfs(x: var XmlParser, count: int, t: TableRef[string,
+    string]): seq[string] =
   # -> parse cellXfs
   # <cellXfs count="6">
   # <xf numFmtId="0" borderId="0" fillId="0" fontId="0" xfId="0"/>
@@ -262,7 +272,12 @@ proc parseCellXfs(x: var XmlParser, count: int): seq[string] =
           case x.kind
           of xmlAttribute:
             if x.attrKey =?= "numFmtId":
-              result.add x.attrValue
+              if x.attrValue in t:
+                result.add t[x.attrValue]
+              elif x.attrValue in STANDARD_FORMATS:
+                result.add STANDARD_FORMATS[x.attrValue]
+              else:
+                result.add "none"
           of xmlElementEnd:
             break
           of xmlEof:
@@ -287,15 +302,17 @@ proc parseStyles(fileName: string): Styles {.inline.} =
   var x: XmlParser
   open(x, s, fileName, {reportWhitespace})
   defer: x.close()
+  var table = newTable[string, string]()
 
   # open xml file
   while true:
     x.next()
     case x.kind
     of xmlElementOpen:
-      # <numFmts
+      # <numFmts  first
       if x.elementName =?= "numFmts":
-        result.numFmts = x.parseNumFmts
+        table = x.parseNumFmts
+      # <cellXfs  second
       elif x.elementName =?= "cellXfs":
         var count: string
         while true:
@@ -308,11 +325,13 @@ proc parseStyles(fileName: string): Styles {.inline.} =
             break
           else:
             discard
-        result.cellXfs = x.parseCellXfs(count.parseInt)
+        result = x.parseCellXfs(count.parseInt, table)
     of xmlEof:
       break # end the world
     else:
       discard
+
+
 
 
 
@@ -376,7 +395,6 @@ proc parseWorkBook(fileName: string): WorkBook =
     of xmlElementOpen:
       if x.elementName =?= "workbookPr":
         # ignore <workbookPr
-        x.next()
         result.date1904 = x.parseDateInWorkBook
     of xmlEof:
       break
@@ -453,7 +471,7 @@ proc parseSheetDate(x: var XmlParser): SheetData {.inline.} =
   # ignore <v>
   x.next()
   while x.kind in CharDataOption:
-    result.nvalue &= x.charData
+    result.dvalue &= x.charData
     x.next()
   # ignore </v>
   # x.next()
@@ -464,7 +482,7 @@ proc calculatePolynomial(a: string): int =
     # !Maybe raise alpha
     result = result * 27 + (ord(a[i]) - ord('A') + 1)
 
-proc parseDimension(x: string): SheetInfo =
+proc parseDimension(x: string, date1904: bool): SheetInfo =
   # A1:B3
   var
     rowLeft, rowRight: int
@@ -478,7 +496,7 @@ proc parseDimension(x: string): SheetInfo =
   pos += parseInt(x, rowRight, pos)
   row = rowRight - rowLeft + 1
   col = calculatePolynomial(colRight) - calculatePolynomial(colLeft) + 1
-  result = (row, col, colLeft & $rowLeft)
+  result = (row, col, colLeft & $rowLeft, date1904)
 
 proc parsePos(x: string, s: SheetInfo): int =
   var
@@ -495,30 +513,65 @@ proc parsePos(x: string, s: SheetInfo): int =
   col = calculatePolynomial(colRight) - calculatePolynomial(colLeft)
   result = row * s.cols + col
 
-proc parseDataKind(s: string): SheetDataKind {.inline.} =
+proc parseDataKind(s: string): (SheetDataKind, string) {.inline.} =
   # <c r="A2" t="s">
   ## convert string to SheetDataKind
   result = case s
-  of "b": sdk.Boolean
-  of "d": sdk.Date
-  of "e": sdk.Error
-  of "inlineStr": sdk.InlineStr
-  of "n": sdk.Num
-  of "s": sdk.SharedString
-  of "str": sdk.Formula
+  of "b": (sdk.Boolean, "bool")
+  of "d": (sdk.Date, "date")
+  of "e": (sdk.Error, "error")
+  of "inlineStr": (sdk.InlineStr, "string")
+  of "n": (sdk.Num, "num")
+  of "s": (sdk.SharedString, "string")
+  of "str": (sdk.Formula, "formula")
   else:
     raise newException(UnKnownSheetDataKindError, "unsupport sheet data kind")
 
-proc parseAttr(s: string): SheetDataKind {.inline.} =
-  discard
+proc parseAttr(s: string, styles: Styles): (SheetDataKind, string) {.inline.} =
+  let
+    style = styles[s.parseInt]
+
+  var kind: string
+  if style in FORMATS:
+    kind = FORMATS[style]
+  else:
+    kind = "date"
+
+  case kind
+  of "float":
+    result = (sdk.Num, style)
+  of "date":
+    result = (sdk.Date, style)
+  of "percentage":
+    # TODO may add new kind
+    result = (sdk.Initial, style)
+  else:
+    result = (sdk.Initial, style)
 
 
-proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
+proc isFloat(x: string): bool {.inline.} =
+  '.' in x
+
+proc toDuration(x: string): Duration =
+
+  var
+    pos: int
+    tok: string
+  pos += x.parseUntil(tok, {'.'}, pos)
+  let
+    intPart = parseInt(tok)
+    floatPart = parseFloat(x[pos ..< x.len])
+
+  result = initDuration(days = intPart)
+
+
+proc parseRowMetaData(x: var XmlParser, s: SheetInfo, styles: Styles): (int, SheetData) =
   # <c r="A2" t="s">
   var
     pos: int
     kind: SheetDataKind
     value: SheetData
+    style: string
   while true:
     x.next()
     case x.kind
@@ -529,9 +582,9 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
         pos = parsePos(x.attrValue, s)
       # catch key "t"
       of "t":
-        kind = parseDataKind(x.attrValue)
+        (kind, style) = parseDataKind(x.attrValue)
       of "s":
-        kind = parseAttr(x.attrValue)
+        (kind, style) = parseAttr(x.attrValue, styles)
     of xmlElementClose, xmlEof:
       break
     else:
@@ -561,6 +614,14 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
       of xmlElementStart:
         if x.elementName =?= "v":
           value = x.parseSheetDate
+          let dur = value.dvalue
+          if isFloat(dur):
+            if s.date1904:
+              value.dvalue = $(initDateTime(1, mJan, 1904, 0, 0, 0, utc()) +
+                  toDuration(dur))
+            else:
+              value.dvalue = $(initDateTime(30, mDec, 1899, 0, 0, 0, utc()) +
+                  toDuration(dur))
       of xmlElementEnd:
         if x.elementName =?= "c":
           break
@@ -629,13 +690,13 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo): (int, SheetData) =
     # raise newException(XlsxError, "not support " & $kind)
   result = (pos, value)
 
-proc parseRowData(x: var XmlParser, s: var Sheet) =
+proc parseRowData(x: var XmlParser, s: var Sheet, styles: Styles) =
   while true:
     x.next()
     case x.kind
     of xmlElementOpen:
       if x.elementName =?= "c":
-        let (pos, value) = parseRowMetaData(x, s.info)
+        let (pos, value) = parseRowMetaData(x, s.info, styles)
         s.data[pos] = value
     of xmlEof:
       break
@@ -644,7 +705,7 @@ proc parseRowData(x: var XmlParser, s: var Sheet) =
   # ignore />
   x.next()
 
-proc parseSheet(fileName: string): Sheet =
+proc parseSheet(fileName: string, styles: Styles, date1904: bool): Sheet =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("Unable to read file: " & fileName)
@@ -662,7 +723,7 @@ proc parseSheet(fileName: string): Sheet =
         case x.kind
         of xmlAttribute:
           if x.attrKey =?= "ref":
-            result.info = parseDimension(x.attrValue)
+            result.info = parseDimension(x.attrValue, date1904)
             result.data = newSeq[SheetData](result.info.rows * result.info.cols)
         of xmlElementEnd:
           break
@@ -684,7 +745,7 @@ proc parseSheet(fileName: string): Sheet =
           case x.kind
           of xmlElementOpen:
             if x.elementName =?= "row":
-              parseRowData(x, result)
+              parseRowData(x, result, styles)
           of xmlEof:
             break
           else:
@@ -712,7 +773,7 @@ proc getKindString(item: SheetData, str: SharedStrings): string {.inline.} =
     result = ""
 
 iterator get(s: Sheet, str: SharedStrings, sep = ","): string {.inline.} =
-  let (rows, cols, _) = s.info
+  let (rows, cols, _, _) = s.info
   for i in 0 ..< rows:
     var res: string
     for j in 0 ..< cols:
@@ -730,7 +791,7 @@ proc plotSym(cols: int, width = 10): string {.inline.} =
 
 proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
     skipHeaders: bool): SheetArray =
-  let (rows, cols, _) = s.info
+  let (rows, cols, _, _) = s.info
   result.shape = (rows, cols)
   result.header = header
   # ignore header
@@ -816,7 +877,8 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
 
   if sheetName == "":
     for key, value in workbook.data.pairs:
-      let sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
+      var sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
+          workbook.date1904)
       result.data[key] = getSheetArray(sheet, sharedString, header, skipHeaders)
     return
 
@@ -825,7 +887,9 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
 
   let
     value = workbook.data[sheetName]
-    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
+  var
+    sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
+        workbook.date1904)
   result.data[sheetName] = getSheetArray(sheet, sharedString, header, skipHeaders)
 
 iterator lines*(fileName: string, sheetName: string,
@@ -839,6 +903,7 @@ iterator lines*(fileName: string, sheetName: string,
   let
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = parseWorkBook(TempDir / contentTypes["workbook"])
+    styles = parseStyles(TempDir / contentTypes["styles"])
 
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
@@ -850,8 +915,9 @@ iterator lines*(fileName: string, sheetName: string,
 
   let
     value = workbook.data[sheetName]
-    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
-
+  var
+    sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
+        workbook.date1904)
   for item in get(sheet, sharedString):
     if skipEmptyLines and len(item) == 0:
       continue
@@ -1070,7 +1136,7 @@ proc parseData*[T](x: sink string): T {.inline.} =
 
 proc getSheetTensor[T](s: Sheet, str: SharedStrings,
     skipHeaders: bool): SheetTensor[T] =
-  let (rows, cols, _) = s.info
+  let (rows, cols, _, _) = s.info
   result.shape = (rows, cols)
   # ignore header
   if skipHeaders:
@@ -1107,6 +1173,7 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
   let
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = parseWorkBook(TempDir / contentTypes["workbook"])
+    styles = parseStyles(TempDir / contentTypes["styles"])
 
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
@@ -1118,7 +1185,7 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
 
   let
     value = workbook.data[sheetName]
-    sheet = parseSheet(TempDir / contentTypes["sheet" & $value])
+    sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles, workbook.date1904)
 
   result = getSheetTensor[T](sheet, sharedString, skipHeaders)
 
@@ -1129,8 +1196,8 @@ when isMainModule:
     excel = "../../tests/test_dateTime.xlsx"
     data = parseExcel(excel, sheetName = sheetName, header = false,
         skipHeaders = false, escapeStrings = true)
-  
-  discard data[sheetName]
+
+  echo data[sheetName]
   # data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   # for i in lines("../../tests/test.xlsx", "Sheet2", skipEmptyLines = true):
