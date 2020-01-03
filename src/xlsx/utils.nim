@@ -174,7 +174,7 @@ proc parseStringTable(x: var XmlParser, res: var seq[string],
             x.parseTData(res, escapeStrings, count)
             # if match chardata, end loop
             break
-        elif x.matchKindName(xmlElementOpen, "t"):
+        of xmlElementOpen:
           if x.elementName =?= "t":
             while x.kind != xmlElementClose:
               x.next()
@@ -1229,7 +1229,7 @@ when isMainModule:
   let excel = "test.xlsx"
   let sheetName = "Sheet1"
   let data = parseExcel(excel, sheetName = sheetName)
-  echo data[sheetName].data
+  echo data[sheetName]
   # let
   #   sheetName = "Sheet1"
   #   excel = "../../tests/test_dateTime.xlsx"
