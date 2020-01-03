@@ -1226,17 +1226,17 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
 
 
 when isMainModule:
-  let excel = "test.xlsx"
-  let sheetName = "Sheet1"
-  let data = parseExcel(excel, sheetName = sheetName)
-  echo data[sheetName]
-  # let
-  #   sheetName = "Sheet1"
-  #   excel = "../../tests/test_dateTime.xlsx"
-  #   data = parseExcel(excel, sheetName = sheetName, header = false,
-  #       skipHeaders = false, escapeStrings = true)
+  # let excel = "test.xlsx"
+  # let sheetName = "Sheet1"
+  # let data = parseExcel(excel, sheetName = sheetName)
+  # echo data[sheetName]
+  let
+    sheetName = "Sheet1"
+    excel = "../../tests/test_dateTime.xlsx"
+    data = parseExcel(excel, sheetName = sheetName, header = false,
+        skipHeaders = false, escapeStrings = true)
 
-  # data[sheetName].show(width = 20)
+  data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   # for i in lines("../../tests/test.xlsx", "Sheet2", skipEmptyLines = true):
