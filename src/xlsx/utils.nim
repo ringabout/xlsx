@@ -100,6 +100,19 @@ template `=?=`(a, b: string): bool =
 proc matchKindName(x: XmlParser, kind: XmlEventKind, name: string): bool {.inline.} =
   x.kind == kind and x.elementName =?= name
 
+proc parseNameSpace(x: var XmlParser, nameSpaceDelimiter = ":"): string {.inline.} =
+  x.next()
+  if x.kind == xmlPI:
+    x.next()
+  if x.kind == xmlElementOpen:
+    let 
+      name = x.elementName
+      idx = rfind(name, nameSpaceDelimiter)
+    if idx > 0:
+      result = name[0 .. idx]
+    elif idx == -1:
+      result = ""
+    
 proc parseOverride(x: var XmlParser, res: var ContentTypes) {.inline.} =
   # ignore xmlElementOpen with name "Override"
   # maybe many attrs
@@ -127,12 +140,13 @@ proc parseContentTypes(fileName: string): ContentTypes {.inline.} =
   open(x, s, fileName)
   defer: x.close()
 
+  let name = parseNameSpace(x)
+
   while true:
-    x.next()
     case x.kind
     of xmlElementOpen:
-      # catch <Override
-      if x.elementName =?= "Override":
+      # catch <namespace:Override
+      if x.elementName =?= (name & "Override"):
         x.parseOverride(result)
     of xmlElementEnd:
       discard
@@ -140,6 +154,7 @@ proc parseContentTypes(fileName: string): ContentTypes {.inline.} =
       break # end the world
     else:
       discard
+    x.next()
 
   let workBookKey = "workbook"
   if workBookKey notin result or result[workBookKey] == "":
@@ -214,7 +229,7 @@ proc parseSharedString(fileName: string, escapeStrings = false): SharedStrings =
           case x.kind
           of xmlAttribute:
             # match attr count
-            if x.attrKey =?= "count":
+            if x.attrKey =?= "uniqueCount":
               # initial seq that stores strings
               result = newSeq[string](parseInt(x.attrValue))
           of xmlElementStart:
@@ -342,10 +357,10 @@ proc parseStyles(fileName: string): Styles {.inline.} =
     else:
       discard
 
-proc parseSheetNameInWorkBook(x: var XmlParser): Table[string, string] =
+proc parseSheetNameInWorkBook(x: var XmlParser, nameSpace: string): Table[string, string] =
   var name: string
 
-  while x.matchKindName(xmlElementOpen, "sheet"):
+  while x.matchKindName(xmlElementOpen, nameSpace & "sheet"):
     # ignore xmlElementOpen with name "sheet"
     x.next()
     # maybe many sheets
@@ -366,13 +381,13 @@ proc parseSheetNameInWorkBook(x: var XmlParser): Table[string, string] =
     # ignore xmlElementEnd />
     x.next()
 
-proc parseDateInWorkBook(x: var XmlParser): bool =
+proc parseDateInWorkBook(x: var XmlParser, nameSpace: string): bool =
   # catch <workbookPr/> or <workbookPr date1904="1"/>
   while true:
     x.next()
     case x.kind
     of xmlAttribute:
-      if x.attrKey =?= "date1904" and parseBool(x.attrValue):
+      if x.attrKey =?= nameSpace & "date1904" and parseBool(x.attrValue):
         result = true
     of xmlElementEnd, xmlEof:
       break
@@ -387,26 +402,24 @@ proc parseWorkBook(fileName: string): WorkBook =
   open(x, s, fileName)
   defer: x.close()
 
+  let name = x.parseNameSpace
+
   while true:
-    x.next()
     case x.kind
     of xmlElementStart:
-      if x.elementName =?= "sheets":
-      # catch <sheets>
-        # ignore sheets
+      if x.elementName =?= name & "sheets":
         x.next()
-        # parse name: sheetId
-        result.data = x.parseSheetNameInWorkBook
-        # over
+        result.data = x.parseSheetNameInWorkBook(name)
         break
     of xmlElementOpen:
-      if x.elementName =?= "workbookPr":
+      if x.elementName =?= name & "workbookPr":
         # ignore <workbookPr
-        result.date1904 = x.parseDateInWorkBook
+        result.date1904 = x.parseDateInWorkBook(name)
     of xmlEof:
       break
     else:
       discard
+    x.next()
 
 proc parseSheetDataBoolean(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.Boolean)
@@ -1226,17 +1239,18 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
 
 
 when isMainModule:
-  # let excel = "test.xlsx"
-  # let sheetName = "Sheet1"
-  # let data = parseExcel(excel, sheetName = sheetName)
-  # echo data[sheetName]
-  let
-    sheetName = "Sheet1"
-    excel = "../../tests/test_dateTime.xlsx"
-    data = parseExcel(excel, sheetName = sheetName, header = false,
-        skipHeaders = false, escapeStrings = true)
+  let excel = "namespace.xlsx"
+  let sheetName = "Data"
+  # echo parseAllSheetName(excel)
+  let data = parseExcel(excel, sheetName = sheetName)
+  echo data[sheetName].data
+  # let
+  #   sheetName = "Sheet1"
+  #   excel = "../../tests/test_dateTime.xlsx"
+  #   data = parseExcel(excel, sheetName = sheetName, header = false,
+  #       skipHeaders = false, escapeStrings = true)
 
-  data[sheetName].show(width = 20)
+  # data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   # for i in lines("../../tests/test.xlsx", "Sheet2", skipEmptyLines = true):
