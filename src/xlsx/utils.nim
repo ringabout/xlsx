@@ -142,6 +142,20 @@ proc parseContentTypes(fileName: string): ContentTypes =
   if workBookKey notin result or result[workBookKey] == "":
     result[workBookKey] = DEFAULT_WORKBOOK_PATH
 
+proc parseTData(x: var XmlParser, res: var seq[string], escapeStrings: bool,
+    count: var int) {.inline.} =
+  # ignore <t>
+  x.next()
+  # match charData in <t>
+  while x.kind in CharDataOption:
+    res[count] &= x.charData
+    x.next()
+  # escape strings
+  if escapeStrings:
+    res[count] = escape(res[count])
+  # seq index
+  inc(count)
+
 proc parseStringTable(x: var XmlParser, res: var seq[string],
     escapeStrings: bool) =
   var count = 0
@@ -154,20 +168,19 @@ proc parseStringTable(x: var XmlParser, res: var seq[string],
       while true:
         x.next()
         # macth <t>
-        if x.matchKindName(xmlElementStart, "t"):
-          # ignore <t>
-          x.next()
-          # match charData in <t>
-          while x.kind in CharDataOption:
-            res[count] &= x.charData
-            x.next()
-          # escape strings
-          if escapeStrings:
-            res[count] = escape(res[count])
-          # seq index
-          inc(count)
-          # if match chardata, end loop
-          break
+        case x.kind
+        of xmlElementStart:
+          if x.elementName =?= "t":
+            x.parseTData(res, escapeStrings, count)
+            # if match chardata, end loop
+            break
+        elif x.matchKindName(xmlElementOpen, "t"):
+          if x.elementName =?= "t":
+            while x.kind != xmlElementClose:
+              x.next()
+            x.parseTData(res, escapeStrings, count)
+            # if match chardata, end loop
+            break
         else:
           discard
         # switch to the next element
@@ -562,7 +575,7 @@ proc toDuration(x: string): Duration {.inline.} =
   let
     intPart = parseInt(tok)
     # in seconds
-    floatPart = parseFloat(x[pos ..< x.len]) * 24 * 3600
+    floatPart = parseFloat(x[pos ..< ^1]) * 24 * 3600
 
   result = initDuration(days = intPart, seconds = int(floatPart))
 
@@ -1213,13 +1226,17 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
 
 
 when isMainModule:
-  let
-    sheetName = "Sheet1"
-    excel = "../../tests/test_dateTime.xlsx"
-    data = parseExcel(excel, sheetName = sheetName, header = false,
-        skipHeaders = false, escapeStrings = true)
+  let excel = "test.xlsx"
+  let sheetName = "Sheet1"
+  let data = parseExcel(excel, sheetName = sheetName)
+  echo data[sheetName].data
+  # let
+  #   sheetName = "Sheet1"
+  #   excel = "../../tests/test_dateTime.xlsx"
+  #   data = parseExcel(excel, sheetName = sheetName, header = false,
+  #       skipHeaders = false, escapeStrings = true)
 
-  data[sheetName].show(width = 20)
+  # data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   # data[sheetName].show(width = 20)
   # for i in lines("../../tests/test.xlsx", "Sheet2", skipEmptyLines = true):
