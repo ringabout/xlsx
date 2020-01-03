@@ -30,6 +30,3 @@ task docs, "Generate docs":
     "--git.url:https://github.com/xflywind/xlsx " &
     "-o:docs/utils.html " &
     "src/xlsx/utils.nim"
-
-  
-# https://github.com/nim-lang/Nim/blob/version-1-0/lib/pure/algorithm.nim#L51

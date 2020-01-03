@@ -1239,11 +1239,11 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
 
 
 when isMainModule:
-  let excel = "namespace.xlsx"
-  let sheetName = "Data"
-  # echo parseAllSheetName(excel)
+  let excel = "../../tests/test_dateTime.xlsx"
+  let sheetName = "Sheet1"
+  echo parseAllSheetName(excel)
   let data = parseExcel(excel, sheetName = sheetName)
-  echo data[sheetName].data
+  echo data[sheetName]
   # let
   #   sheetName = "Sheet1"
   #   excel = "../../tests/test_dateTime.xlsx"
