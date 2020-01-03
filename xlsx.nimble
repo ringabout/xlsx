@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.3.6"
+version       = "0.3.8"
 author        = "flywind"
 description   = "Read and parse Excel files"
 license       = "MIT"
