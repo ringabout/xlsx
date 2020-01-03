@@ -100,7 +100,25 @@ template `=?=`(a, b: string): bool =
 proc matchKindName(x: XmlParser, kind: XmlEventKind, name: string): bool {.inline.} =
   x.kind == kind and x.elementName =?= name
 
-proc parseContentTypes(fileName: string): ContentTypes =
+proc parseOverride(x: var XmlParser, res: var ContentTypes) {.inline.} =
+  # ignore xmlElementOpen with name "Override"
+  # maybe many attrs
+  while true:
+    x.next()
+    case x.kind
+    of xmlAttribute:
+      # match attr PartName
+      if x.attrKey =?= "PartName":
+        let
+          path = x.attrValue
+          name = path.splitFile.name
+        res[name] = path
+    of xmlElementEnd:
+      break
+    else:
+      discard
+
+proc parseContentTypes(fileName: string): ContentTypes {.inline.} =
   # TODO maybe add namespaceUri
   # open xml file
   var s = newFileStream(fileName, fmRead)
@@ -115,22 +133,7 @@ proc parseContentTypes(fileName: string): ContentTypes =
     of xmlElementOpen:
       # catch <Override
       if x.elementName =?= "Override":
-        # ignore xmlElementOpen with name "Override"
-        # maybe many attrs
-        while true:
-          x.next()
-          case x.kind
-          of xmlAttribute:
-            # match attr PartName
-            if x.attrKey =?= "PartName":
-              let
-                path = x.attrValue
-                name = path.splitFile.name
-              result[name] = path
-          of xmlElementEnd:
-            break
-          else:
-            discard
+        x.parseOverride(result)
     of xmlElementEnd:
       discard
     of xmlEof:
@@ -225,8 +228,6 @@ proc parseSharedString(fileName: string, escapeStrings = false): SharedStrings =
     else:
       discard
 
-
-# TODO Maybe TableRef
 proc parseNumFmts(x: var XmlParser): TableRef[string, string] =
   # -> parse numFmts
   # <numFmts count="2">
@@ -496,7 +497,6 @@ proc parseSheetTime(x: var XmlParser): SheetData {.inline.} =
 
 proc calculatePolynomial(a: string): int {.inline.} =
   for i in 0 .. a.high:
-    # !Maybe raise alpha
     result = result * 27 + (ord(a[i]) - ord('A') + 1)
 
 proc parseDimension(x: string, date1904: bool): SheetInfo =
