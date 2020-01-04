@@ -891,8 +891,6 @@ function main() {
     title="toCsv(s: SheetArray; dest: string; sep = &quot;,&quot;)"><wbr />to<wbr />Csv<span class="attachedType">SheetArray</span></a></li>
   <li><a class="reference" href="#toSeq%2CSheetArray"
     title="toSeq(s: SheetArray; skipHeaders = false): seq[seq[string]]"><wbr />to<wbr />Seq<span class="attachedType">SheetArray</span></a></li>
-  <li><a class="reference" href="#parseData"
-    title="parseData[T](x: sink string): T"><wbr />parse<wbr />Data<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#readExcel%2Cstring%2Cstring"
     title="readExcel[T: SomeNumber | bool | string](fileName: string; sheetName: string;
                                     skipHeaders = false; escapeStrings = false): SheetTensor[
@@ -1086,9 +1084,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 get all sheet name
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L866"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L892"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L866" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L892" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseExcel,string,string"></a>
@@ -1106,9 +1104,9 @@ parse excel and return SheetTable which contains all sheetArray.
   <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="StringLit">&quot;Sheet2&quot;</span>
 <span class="Identifier">echo</span> <span class="Identifier">data</span><span class="Other">[</span><span class="Identifier">sheetName</span><span class="Other">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L878"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L904"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L878" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L904" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[],SheetArray,Natural,Natural"></a>
@@ -1117,9 +1115,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L948"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L974"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L948" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L974" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[]=,SheetArray,Natural,Natural,string"></a>
@@ -1129,9 +1127,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L954"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L980"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L954" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L980" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="$,SheetArray"></a>
@@ -1140,9 +1138,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 display SheetArray
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L963"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L989"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L963" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L989" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="show,SheetArray,int,int,int"></a>
@@ -1157,9 +1155,9 @@ display SheetArray with more control
   <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">parseExcel</span><span class="Other">(</span><span class="Identifier">excel</span><span class="Other">,</span> <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="Identifier">sheetName</span><span class="Other">,</span> <span class="Identifier">header</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">,</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span>
 <span class="Identifier">data</span><span class="Other">[</span><span class="Identifier">sheetName</span><span class="Other">]</span><span class="Other">.</span><span class="Identifier">show</span><span class="Other">(</span><span class="Identifier">width</span> <span class="Other">=</span> <span class="DecNumber">20</span><span class="Other">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L983"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1009"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L983" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1009" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toCsv,SheetArray,string,string"></a>
@@ -1173,9 +1171,9 @@ Parse SheetArray and write a Csv file
 <span class="Keyword">let</span> <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">parseExcel</span><span class="Other">(</span><span class="StringLit">&quot;tests/test.xlsx&quot;</span><span class="Other">)</span>
 <span class="Identifier">data</span><span class="Other">[</span><span class="Identifier">sheetName</span><span class="Other">]</span><span class="Other">.</span><span class="Identifier">toCsv</span><span class="Other">(</span><span class="StringLit">&quot;tests/test.csv&quot;</span><span class="Other">,</span> <span class="Identifier">sep</span> <span class="Other">=</span> <span class="StringLit">&quot;,&quot;</span><span class="Other">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1080"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1106"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1080" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1106" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toSeq,SheetArray"></a>
@@ -1191,20 +1189,9 @@ Parse SheetArray and return a seq[seq[string]]
 <span class="Keyword">for</span> <span class="Identifier">row</span> <span class="Keyword">in</span> <span class="Identifier">rows</span><span class="Other">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">row</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1098"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1124"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1098" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="parseData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#parseData"><span class="Identifier">parseData</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">sink</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1134"
-class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1134" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1124" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="readExcel,string,string"></a>
@@ -1220,9 +1207,9 @@ read excel for scientific calculation
                        <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span>
 <span class="Identifier">assert</span><span class="Other">(</span><span class="Identifier">data</span><span class="Other">.</span><span class="Identifier">data</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Other">[</span><span class="DecNumber">1</span><span class="Other">,</span> <span class="DecNumber">4</span><span class="Other">,</span> <span class="DecNumber">7</span><span class="Other">,</span> <span class="DecNumber">9</span><span class="Other">,</span> <span class="DecNumber">4</span><span class="Other">,</span> <span class="DecNumber">7</span><span class="Other">,</span> <span class="DecNumber">0</span><span class="Other">,</span> <span class="DecNumber">3</span><span class="Other">,</span> <span class="DecNumber">12</span><span class="Other">,</span> <span class="DecNumber">54</span><span class="Other">,</span> <span class="DecNumber">24</span><span class="Other">,</span> <span class="DecNumber">887</span><span class="Other">]</span><span class="Other">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1181"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1207"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1181" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1207" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1243,9 +1230,9 @@ return lines of xlsx
 <pre class="listing"><span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="Identifier">lines</span><span class="Other">(</span><span class="StringLit">&quot;tests/test.xlsx&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Sheet2&quot;</span><span class="Other">)</span><span class="Other">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">i</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L917"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L943"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L917" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L943" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1259,9 +1246,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L960"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L986"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L960" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L986" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1274,7 +1261,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2020-01-02 07:31:16 UTC</small>
+        <small>Made with Nim. Generated: 2020-01-04 08:37:11 UTC</small>
       </div>
     </div>
   </div>

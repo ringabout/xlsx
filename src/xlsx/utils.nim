@@ -175,7 +175,7 @@ proc parseTData(x: var XmlParser, res: var seq[string], escapeStrings: bool,
   inc(count)
 
 proc parseStringTable(x: var XmlParser, res: var seq[string],
-    escapeStrings: bool) =
+    escapeStrings: bool) {.inline.} =
   var count = 0
   while true:
     # match <si>
@@ -208,7 +208,7 @@ proc parseStringTable(x: var XmlParser, res: var seq[string],
       discard
     x.next()
 
-proc parseSharedString(fileName: string, escapeStrings = false): SharedStrings =
+proc parseSharedString(fileName: string, escapeStrings = false): SharedStrings {.inline.} =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("Unable to read file: " & fileName)
@@ -243,7 +243,7 @@ proc parseSharedString(fileName: string, escapeStrings = false): SharedStrings =
     else:
       discard
 
-proc parseNumFmts(x: var XmlParser): TableRef[string, string] =
+proc parseNumFmts(x: var XmlParser): TableRef[string, string] {.inline.} =
   # -> parse numFmts
   # <numFmts count="2">
   # <numFmt formatCode="dd"-"mm"-"yyyy" "hh:mm:ss" numFmtId="176"/>
@@ -281,7 +281,7 @@ proc parseNumFmts(x: var XmlParser): TableRef[string, string] =
       discard
 
 proc parseCellXfs(x: var XmlParser, count: int, t: TableRef[string,
-    string]): seq[string] =
+    string]): seq[string] {.inline.} =
   # -> parse cellXfs
   # <cellXfs count="6">
   # <xf numFmtId="0" borderId="0" fillId="0" fontId="0" xfId="0"/>
@@ -357,7 +357,7 @@ proc parseStyles(fileName: string): Styles {.inline.} =
     else:
       discard
 
-proc parseSheetNameInWorkBook(x: var XmlParser, nameSpace: string): Table[string, string] =
+proc parseSheetNameInWorkBook(x: var XmlParser, nameSpace: string): Table[string, string] {.inline.} =
   var name: string
 
   while x.matchKindName(xmlElementOpen, nameSpace & "sheet"):
@@ -381,7 +381,7 @@ proc parseSheetNameInWorkBook(x: var XmlParser, nameSpace: string): Table[string
     # ignore xmlElementEnd />
     x.next()
 
-proc parseDateInWorkBook(x: var XmlParser, nameSpace: string): bool =
+proc parseDateInWorkBook(x: var XmlParser, nameSpace: string): bool {.inline.} =
   # catch <workbookPr/> or <workbookPr date1904="1"/>
   while true:
     x.next()
@@ -394,7 +394,7 @@ proc parseDateInWorkBook(x: var XmlParser, nameSpace: string): bool =
     else:
       discard
 
-proc parseWorkBook(fileName: string): WorkBook =
+proc parseWorkBook(fileName: string): WorkBook {.inline.} =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("Unable to read file: " & fileName)
@@ -512,7 +512,7 @@ proc calculatePolynomial(a: string): int {.inline.} =
   for i in 0 .. a.high:
     result = result * 27 + (ord(a[i]) - ord('A') + 1)
 
-proc parseDimension(x: string, date1904: bool): SheetInfo =
+proc parseDimension(x: string, date1904: bool): SheetInfo {.inline.} =
   # A1:B3
   var
     rowLeft, rowRight: int
@@ -528,7 +528,7 @@ proc parseDimension(x: string, date1904: bool): SheetInfo =
   col = calculatePolynomial(colRight) - calculatePolynomial(colLeft) + 1
   result = (row, col, colLeft & $rowLeft, date1904)
 
-proc parsePos(x: string, s: SheetInfo): int =
+proc parsePos(x: string, s: SheetInfo): int {.inline.} =
   var
     rowRight, rowLeft: int
     colRight, colLeft: string
@@ -751,7 +751,7 @@ proc parseRowData(x: var XmlParser, s: var Sheet, styles: Styles) {.inline.} =
   # ignore />
   x.next()
 
-proc parseSheet(fileName: string, styles: Styles, date1904: bool): Sheet =
+proc parseSheet(fileName: string, styles: Styles, date1904: bool): Sheet {.inline.} =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("Unable to read file: " & fileName)
@@ -1157,7 +1157,7 @@ proc toSeq*(s: SheetArray, skipHeaders = false): seq[seq[string]] {.inline.} = #
     else:
       cCount += 1
 
-proc parseData*[T](x: sink string): T {.inline.} =
+proc parseData[T](x: sink string): T {.inline.} =
   when T is SomeSignedInt:
     try:
       result = T(x.parseInt)
@@ -1182,7 +1182,7 @@ proc parseData*[T](x: sink string): T {.inline.} =
     result = move(x)
 
 proc getSheetTensor[T](s: Sheet, str: SharedStrings,
-    skipHeaders: bool): SheetTensor[T] =
+    skipHeaders: bool): SheetTensor[T] {.inline.} =
   let (rows, cols, _, _) = s.info
   result.shape = (rows, cols)
   # ignore header
@@ -1239,7 +1239,7 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
 
 
 when isMainModule:
-  let excel = "../../tests/test_dateTime.xlsx"
+  let excel = "../../tests/test_date_time.xlsx"
   let sheetName = "Sheet1"
   echo parseAllSheetName(excel)
   let data = parseExcel(excel, sheetName = sheetName)
