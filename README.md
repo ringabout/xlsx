@@ -1,4 +1,6 @@
-# xlsx
+[![Build Status](https://dev.azure.com/xzsflywind/xlsx/_apis/build/status/xflywind.xlsx?branchName=master)](https://dev.azure.com/xzsflywind/xlsx/_build/latest?definitionId=2&branchName=master)
+
+# xlsx 
 Parse xlsx written in Nim.[WIP]
 
 ### Docs
