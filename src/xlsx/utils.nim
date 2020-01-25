@@ -105,14 +105,14 @@ proc parseNameSpace(x: var XmlParser, nameSpaceDelimiter = ":"): string {.inline
   if x.kind == xmlPI:
     x.next()
   if x.kind == xmlElementOpen:
-    let 
+    let
       name = x.elementName
       idx = rfind(name, nameSpaceDelimiter)
     if idx > 0:
       result = name[0 .. idx]
     elif idx == -1:
       result = ""
-    
+
 proc parseOverride(x: var XmlParser, res: var ContentTypes) {.inline.} =
   # ignore xmlElementOpen with name "Override"
   # maybe many attrs
@@ -208,7 +208,8 @@ proc parseStringTable(x: var XmlParser, res: var seq[string],
       discard
     x.next()
 
-proc parseSharedString(fileName: string, escapeStrings = false): SharedStrings {.inline.} =
+proc parseSharedString(fileName: string,
+    escapeStrings = false): SharedStrings {.inline.} =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("Unable to read file: " & fileName)
@@ -357,7 +358,8 @@ proc parseStyles(fileName: string): Styles {.inline.} =
     else:
       discard
 
-proc parseSheetNameInWorkBook(x: var XmlParser, nameSpace: string): Table[string, string] {.inline.} =
+proc parseSheetNameInWorkBook(x: var XmlParser, nameSpace: string): Table[
+    string, string] {.inline.} =
   var name: string
 
   while x.matchKindName(xmlElementOpen, nameSpace & "sheet"):
@@ -736,13 +738,16 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo, styles: Styles): (int, She
     # raise newException(XlsxError, "not support " & $kind)
   result = (pos, value)
 
-proc parseRowData(x: var XmlParser, s: var Sheet, styles: Styles) {.inline.} =
+proc parseRowData(x: var XmlParser, s: var Sheet, styles: Styles,
+    skipEmptyLines: bool, position: var int) {.inline.} =
+  
   while true:
     x.next()
     case x.kind
     of xmlElementOpen:
       if x.elementName =?= "c":
         let (pos, value) = parseRowMetaData(x, s.info, styles)
+        position = pos
         s.data[pos] = value
     of xmlEof:
       break
@@ -751,7 +756,8 @@ proc parseRowData(x: var XmlParser, s: var Sheet, styles: Styles) {.inline.} =
   # ignore />
   x.next()
 
-proc parseSheet(fileName: string, styles: Styles, date1904: bool): Sheet {.inline.} =
+proc parseSheet(fileName: string, styles: Styles, date1904: bool,
+    skipEmptyLines = false): Sheet {.inline.} =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("Unable to read file: " & fileName)
@@ -770,7 +776,9 @@ proc parseSheet(fileName: string, styles: Styles, date1904: bool): Sheet {.inlin
         of xmlAttribute:
           if x.attrKey =?= "ref":
             result.info = parseDimension(x.attrValue, date1904)
-            result.data = newSeq[SheetData](result.info.rows * result.info.cols)
+            result.data = newSeq[SheetData](result.info.rows *
+                result.info.cols)
+
         of xmlElementEnd:
           break
         else:
@@ -779,6 +787,8 @@ proc parseSheet(fileName: string, styles: Styles, date1904: bool): Sheet {.inlin
       # discard />
       x.next()
       break
+
+  var position: int
   # parse data
   while true:
     x.next()
@@ -791,7 +801,7 @@ proc parseSheet(fileName: string, styles: Styles, date1904: bool): Sheet {.inlin
           case x.kind
           of xmlElementOpen:
             if x.elementName =?= "row":
-              parseRowData(x, result, styles)
+              x.parseRowData(result, styles, skipEmptyLines, position)
           of xmlEof:
             break
           else:
@@ -800,6 +810,12 @@ proc parseSheet(fileName: string, styles: Styles, date1904: bool): Sheet {.inlin
       break
     else:
       discard
+  
+  if skipEmptyLines:
+    result.data.setLen(position)
+    let 
+      rows = (position + 1) div result.info.cols
+    result.info.rows = rows
 
 proc getKindString(item: SheetData, str: SharedStrings): string {.inline.} =
   case item.kind
@@ -845,7 +861,8 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
   # ignore header
   if skipHeaders:
     dec(result.shape.rows)
-  result.data = newseq[string](result.shape.rows * cols)
+
+  result.data = newSeq[string](result.shape.rows * cols)
   result.colType = newSeq[SheetDataKind](cols)
   if likely(not skipHeaders):
     var
@@ -885,7 +902,7 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
         inc(skipType)
       result.data[pos] = getKindString(item, str)
       inc(pos)
-    result.data = result.data
+
     # if skip header, header should be false
     result.header = false
 
@@ -902,7 +919,7 @@ proc parseAllSheetName*(fileName: string): seq[string] {.inline.} =
     result.add(key)
 
 proc parseExcel*(fileName: string, sheetName = "", header = false,
-    skipHeaders = false, escapeStrings = false): SheetTable =
+    skipHeaders = false, escapeStrings = false, skipEmptyLines = false): SheetTable =
   ## parse excel and return SheetTable which contains
   ## all sheetArray.
   runnableExamples:
@@ -926,7 +943,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   if sheetName == "":
     for key, value in workbook.data.pairs:
       var sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
-          workbook.date1904)
+          workbook.date1904, skipEmptyLines)
       result.data[key] = getSheetArray(sheet, sharedString, header, skipHeaders)
     return
 
@@ -937,7 +954,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     value = workbook.data[sheetName]
   var
     sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
-        workbook.date1904)
+        workbook.date1904, skipEmptyLines)
   result.data[sheetName] = getSheetArray(sheet, sharedString, header, skipHeaders)
 
 iterator lines*(fileName: string, sheetName: string,
