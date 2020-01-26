@@ -152,7 +152,7 @@ function main() {
     title="parseAllSheetName(fileName: string): seq[string]"><wbr />parse<wbr />All<wbr />Sheet<wbr />Name<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#parseExcel%2Cstring%2Cstring"
     title="parseExcel(fileName: string; sheetName = &quot;&quot;; header = false; skipHeaders = false;
-           escapeStrings = false; trailing = false): SheetTable"><wbr />parse<wbr />Excel<span class="attachedType">SheetTable</span></a></li>
+           escapeStrings = false; trailingRows = false): SheetTable"><wbr />parse<wbr />Excel<span class="attachedType">SheetTable</span></a></li>
   <li><a class="reference" href="#%5B%5D%2CSheetArray%2CNatural%2CNatural"
     title="`[]`(s: SheetArray; i, j: Natural): string"><wbr />`[]`<span class="attachedType">SheetArray</span></a></li>
   <li><a class="reference" href="#%5B%5D%3D%2CSheetArray%2CNatural%2CNatural%2Cstring"
@@ -324,7 +324,7 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><a href="utils.html#TempDir"><span class="Identifier">TempDir</span></a> <span class="Other">=</span> <span class="Identifier">getTempDir</span><span class="Other">(</span><span class="Other">)</span> <span class="Operator">/</span> <span class="StringLit">&quot;xlsx_windx_tmp&quot;</span></pre></dt>
 <dd>
 
-
+temp dir for all extracted xml files from Excel
 &nbsp;&nbsp;<a
 href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L12"
 class="link-seesrc" target="_blank">Source</a>
@@ -342,7 +342,7 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-Extract xml file from excel using zip, default path is TempDir.
+extract xml file from excel using zip, default path is TempDir.
 &nbsp;&nbsp;<a
 href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L80"
 class="link-seesrc" target="_blank">Source</a>
@@ -365,13 +365,16 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="parseExcel,string,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#parseExcel%2Cstring%2Cstring"><span class="Identifier">parseExcel</span></a><span class="Other">(</span><span class="Identifier">fileName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">header</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
-               <span class="Identifier">escapeStrings</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">trailing</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="utils.html#SheetTable"><span class="Identifier">SheetTable</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
+               <span class="Identifier">escapeStrings</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">trailingRows</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="utils.html#SheetTable"><span class="Identifier">SheetTable</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
     <span class="Identifier">NotExistsXlsxFileError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">InvalidXlsxFileError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span>
     <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">UnKnownSheetDataKindError</span><span class="Other">,</span> <span class="Identifier">NotFoundSheetError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-parse excel and return SheetTable which contains all sheetArray.
+<p>Parse excel and return SheetTable which contains all sheetArray.</p>
+<p><tt class="docutils literal"><span class="pre">trailingRows</span></tt> is used to skip empty lines after last row with elements. But If there are some empty lines before last row with elements, these lines will be kept.</p>
+<p>If you want to skip all empty lines, you should use iterator <tt class="docutils literal"><span class="pre">lines</span></tt> and set <tt class="docutils literal"><span class="pre">skipEmptyLines</span></tt> = <tt class="docutils literal"><span class="pre">true</span></tt>.</p>
+
 <p><strong class="examples_text">Examples:</strong></p>
 <pre class="listing"><span class="Keyword">let</span>
   <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">parseExcel</span><span class="Other">(</span><span class="StringLit">&quot;tests/test.xlsx&quot;</span><span class="Other">)</span>
@@ -389,9 +392,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L990"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L995"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L990" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L995" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[]=,SheetArray,Natural,Natural,string"></a>
@@ -401,9 +404,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L996"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1001"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L996" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1001" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="$,SheetArray"></a>
@@ -412,9 +415,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 display SheetArray
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1005"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1010"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1005" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1010" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="show,SheetArray,int,int,int"></a>
@@ -429,9 +432,9 @@ display SheetArray with more control
   <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">parseExcel</span><span class="Other">(</span><span class="Identifier">excel</span><span class="Other">,</span> <span class="Identifier">sheetName</span> <span class="Other">=</span> <span class="Identifier">sheetName</span><span class="Other">,</span> <span class="Identifier">header</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">,</span> <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span>
 <span class="Identifier">data</span><span class="Other">[</span><span class="Identifier">sheetName</span><span class="Other">]</span><span class="Other">.</span><span class="Identifier">show</span><span class="Other">(</span><span class="Identifier">width</span> <span class="Other">=</span> <span class="DecNumber">20</span><span class="Other">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1025"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1030"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1025" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1030" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toCsv,SheetArray,string,string"></a>
@@ -445,9 +448,9 @@ Parse SheetArray and write a Csv file
 <span class="Keyword">let</span> <span class="Identifier">data</span> <span class="Other">=</span> <span class="Identifier">parseExcel</span><span class="Other">(</span><span class="StringLit">&quot;tests/test.xlsx&quot;</span><span class="Other">)</span>
 <span class="Identifier">data</span><span class="Other">[</span><span class="Identifier">sheetName</span><span class="Other">]</span><span class="Other">.</span><span class="Identifier">toCsv</span><span class="Other">(</span><span class="StringLit">&quot;tests/test.csv&quot;</span><span class="Other">,</span> <span class="Identifier">sep</span> <span class="Other">=</span> <span class="StringLit">&quot;,&quot;</span><span class="Other">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1122"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1127"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1122" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1127" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toSeq,SheetArray"></a>
@@ -463,9 +466,9 @@ Parse SheetArray and return a seq[seq[string]]
 <span class="Keyword">for</span> <span class="Identifier">row</span> <span class="Keyword">in</span> <span class="Identifier">rows</span><span class="Other">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">row</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1140"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1145"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1140" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1145" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="readExcel,string,string"></a>
@@ -481,9 +484,9 @@ read excel for scientific calculation
                        <span class="Identifier">skipHeaders</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span>
 <span class="Identifier">assert</span><span class="Other">(</span><span class="Identifier">data</span><span class="Other">.</span><span class="Identifier">data</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Other">[</span><span class="DecNumber">1</span><span class="Other">,</span> <span class="DecNumber">4</span><span class="Other">,</span> <span class="DecNumber">7</span><span class="Other">,</span> <span class="DecNumber">9</span><span class="Other">,</span> <span class="DecNumber">4</span><span class="Other">,</span> <span class="DecNumber">7</span><span class="Other">,</span> <span class="DecNumber">0</span><span class="Other">,</span> <span class="DecNumber">3</span><span class="Other">,</span> <span class="DecNumber">12</span><span class="Other">,</span> <span class="DecNumber">54</span><span class="Other">,</span> <span class="DecNumber">24</span><span class="Other">,</span> <span class="DecNumber">887</span><span class="Other">]</span><span class="Other">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1223"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1228"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1223" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1228" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -504,9 +507,9 @@ return lines of xlsx
 <pre class="listing"><span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="Identifier">lines</span><span class="Other">(</span><span class="StringLit">&quot;tests/test.xlsx&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Sheet2&quot;</span><span class="Other">)</span><span class="Other">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">i</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L959"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L964"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L959" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L964" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -520,9 +523,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1002"
+href="https://github.com/xflywind/xlsx/tree/master/src/xlsx/utils.nim#L1007"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1002" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/xflywind/xlsx/edit/master/src/xlsx/utils.nim#L1007" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -535,7 +538,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-01-26 00:04:16 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-01-26 07:24:23 UTC</small>
       </div>
     </div>
   </div>

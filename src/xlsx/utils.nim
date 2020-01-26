@@ -9,7 +9,7 @@ const
   UpperLetters = {'A' .. 'Z'}
   CharDataOption = {xmlCharData, xmlWhitespace}
   DEFAULT_WORKBOOK_PATH = "xl/workbook.xml"
-let TempDir* = getTempDir() / "xlsx_windx_tmp"
+let TempDir* = getTempDir() / "xlsx_windx_tmp" ## temp dir for all extracted xml files from Excel
 
 
 type
@@ -78,7 +78,7 @@ when defined(windows):
   {.passl: "-lz".}
 
 proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
-  ## Extract xml file from excel using zip,
+  ## extract xml file from excel using zip,
   ## default path is TempDir.
   if not existsFile(src):
     raise newException(NotExistsXlsxFileError, "No such xlsx file: " & src)
@@ -919,8 +919,13 @@ proc parseAllSheetName*(fileName: string): seq[string] {.inline.} =
 
 proc parseExcel*(fileName: string, sheetName = "", header = false,
     skipHeaders = false, escapeStrings = false, trailingRows = false): SheetTable =
-  ## parse excel and return SheetTable which contains
+  ## Parse excel and return SheetTable which contains
   ## all sheetArray.
+  ## 
+  ## `trailingRows` is used to skip empty lines after last row with elements.
+  ## But If there are some empty lines before last row with elements, these lines will be kept.
+  ## 
+  ## If you want to skip all empty lines, you should use iterator `lines` and set `skipEmptyLines` = `true`.
   runnableExamples:
     let
       data = parseExcel("tests/test.xlsx")
