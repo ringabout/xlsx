@@ -756,7 +756,7 @@ proc parseRowData(x: var XmlParser, s: var Sheet, styles: Styles, position: var 
   x.next()
 
 proc parseSheet(fileName: string, styles: Styles, date1904: bool,
-    trailing = false): Sheet {.inline.} =
+    trailingRows = false): Sheet {.inline.} =
   # open xml file
   var s = newFileStream(fileName, fmRead)
   if s == nil: quit("Unable to read file: " & fileName)
@@ -810,7 +810,7 @@ proc parseSheet(fileName: string, styles: Styles, date1904: bool,
     else:
       discard
   
-  if trailing:
+  if trailingRows:
     result.data.setLen(position + 1)
     let 
       rows = (position + 1) div result.info.cols
@@ -918,7 +918,7 @@ proc parseAllSheetName*(fileName: string): seq[string] {.inline.} =
     result.add(key)
 
 proc parseExcel*(fileName: string, sheetName = "", header = false,
-    skipHeaders = false, escapeStrings = false, trailing = false): SheetTable =
+    skipHeaders = false, escapeStrings = false, trailingRows = false): SheetTable =
   ## parse excel and return SheetTable which contains
   ## all sheetArray.
   runnableExamples:
@@ -942,7 +942,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
   if sheetName == "":
     for key, value in workbook.data.pairs:
       var sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
-          workbook.date1904, trailing)
+          workbook.date1904, trailingRows)
       result.data[key] = getSheetArray(sheet, sharedString, header, skipHeaders)
     return
 
@@ -953,7 +953,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     value = workbook.data[sheetName]
   var
     sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
-        workbook.date1904, trailing)
+        workbook.date1904, trailingRows)
   result.data[sheetName] = getSheetArray(sheet, sharedString, header, skipHeaders)
 
 iterator lines*(fileName: string, sheetName: string,
