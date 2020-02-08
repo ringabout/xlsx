@@ -1,6 +1,6 @@
 [![Build Status](https://dev.azure.com/xzsflywind/xlsx/_apis/build/status/xflywind.xlsx?branchName=master)](https://dev.azure.com/xzsflywind/xlsx/_build/latest?definitionId=2&branchName=master)
 
-# xlsx 
+# xlsx [![nimble](https://raw.githubusercontent.com/yglukhov/nimble-tag/master/nimble.png)](https://github.com/yglukhov/nimble-tag)
 Parse xlsx written in Nim.[WIP]
 
 ### Docs
