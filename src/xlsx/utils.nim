@@ -589,6 +589,10 @@ proc toDuration(x: string): Duration {.inline.} =
   pos += x.parseUntil(tok, {'.'}, pos)
   let
     intPart = parseInt(tok)
+
+  var floatPart: float
+
+  if pos > x.len:
     # in seconds
     floatPart = parseFloat(x[pos ..< ^1]) * 24 * 3600
 
