@@ -163,9 +163,7 @@ proc parseContentTypes(fileName: string): ContentTypes {.inline.} =
     result[workBookKey] = DEFAULT_WORKBOOK_PATH
 
 proc parseRelationship(x: var XmlParser, res: var Relationships) {.inline.} =
-  var
-    id: string
-    target: string
+  var id, target: string
 
   while true:
     x.next()
@@ -970,6 +968,7 @@ proc parseAllSheetName*(fileName: string): seq[string] {.inline.} =
 
 proc getRelsFileName(fileName: string): string =
   let pathParts = fileName.splitFile
+  # Valid even when name and ext are empty (i.e. /_rels/.rels)
   result = pathParts.dir / "_rels" / pathParts.name & pathParts.ext & ".rels"
 
 proc parseSheetFileNames(contentTypes: ContentTypes, workbook: WorkBook): Table[string, string] =
