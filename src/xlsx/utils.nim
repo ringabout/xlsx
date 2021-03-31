@@ -969,8 +969,8 @@ proc parseAllSheetName*(fileName: string): seq[string] {.inline.} =
     result.add(key)
 
 proc getRelsFileName(fileName: string): string =
-  let pathParts = fileName.splitPath
-  result = pathParts.head / "_rels" / pathParts.tail & ".rels"
+  let pathParts = fileName.splitFile
+  result = pathParts.dir / "_rels" / pathParts.name & pathParts.ext & ".rels"
 
 proc parseSheetFileNames(contentTypes: ContentTypes, workbook: WorkBook): Table[string, string] =
   let
