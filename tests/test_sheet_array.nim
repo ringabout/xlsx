@@ -3,7 +3,7 @@ import unittest
 import xlsx
 
 suite "Test SheetArray":
-  let sheetName = "Sheet2"
+  let sheetName = "Sheet1"
 
   test "Get one element from SheetArray":
     let data = parseExcel("tests/test.xlsx")
