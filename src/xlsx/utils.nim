@@ -980,7 +980,7 @@ proc parseSheetFileNames(contentTypes: ContentTypes, workbook: WorkBook): Table[
   result = collect(initTable(workbook.data.len)):
     for sheetName, rId in workbook.data.pairs:
       let
-        internalSheetName = workbookRels[rId]
+        internalSheetName = workbookRels[rId].splitFile.name
         sheetFileName = contentTypes[internalSheetName]
 
       {sheetName: sheetFileName}
