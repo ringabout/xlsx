@@ -1,5 +1,6 @@
 import os, streams, parsexml, parseutils, tables, times, strutils
 import format
+import sugar
 
 import zip / zipfiles
 
@@ -27,6 +28,7 @@ type
     data: Table[string, string]
     date1904: bool
   ContentTypes = Table[string, string]
+  Relationships = Table[string, string]
   SharedStrings = seq[string]
   Styles = seq[string]
 
@@ -159,6 +161,49 @@ proc parseContentTypes(fileName: string): ContentTypes {.inline.} =
   let workBookKey = "workbook"
   if workBookKey notin result or result[workBookKey] == "":
     result[workBookKey] = DEFAULT_WORKBOOK_PATH
+
+proc parseRelationship(x: var XmlParser, res: var Relationships) {.inline.} =
+  var id, target: string
+
+  while true:
+    x.next()
+    case x.kind
+    of xmlAttribute:
+      # match attr Id
+      if x.attrKey =?= "Id":
+        id = x.attrValue
+      # match attr Target
+      if x.attrKey =?= "Target":
+        target = x.attrValue
+    of xmlElementEnd:
+      break
+    else:
+      discard
+
+  res[id] = target
+
+proc parseRelationships(fileName: string): Relationships {.inline.} =
+  var s = newFileStream(fileName, fmRead)
+  if s == nil: quit("Unable to read file: " & fileName)
+  var x: XmlParser
+  open(x, s, fileName)
+  defer: x.close()
+
+  let name = parseNameSpace(x)
+
+  while true:
+    case x.kind
+    of xmlElementOpen:
+      # catch <namespace:Relationship
+      if x.elementName =?= (name & "Relationship"):
+        x.parseRelationship(result)
+    of xmlElementEnd:
+      discard
+    of xmlEof:
+      break
+    else:
+      discard
+    x.next()
 
 proc parseTData(x: var XmlParser, res: var seq[string], escapeStrings: bool,
     count: var int) {.inline.} =
@@ -372,8 +417,8 @@ proc parseSheetNameInWorkBook(x: var XmlParser, nameSpace: string): Table[
         # parse name -> "Sheet1"
         if x.attrKey =?= "name":
           name = x.attrValue
-        # parse sheetId -> "s1"
-        if x.attrKey =?= "sheetId":
+        # parse r:id -> "rId1"
+        if x.attrKey =?= "r:id":
           result[name] = x.attrValue
       of xmlElementEnd:
         break
@@ -921,6 +966,24 @@ proc parseAllSheetName*(fileName: string): seq[string] {.inline.} =
   for key in workbook.data.keys:
     result.add(key)
 
+proc getRelsFileName(fileName: string): string =
+  let pathParts = fileName.splitFile
+  # Valid even when name and ext are empty (i.e. /_rels/.rels)
+  result = pathParts.dir / "_rels" / pathParts.name & pathParts.ext & ".rels"
+
+proc parseSheetFileNames(contentTypes: ContentTypes, workbook: WorkBook): Table[string, string] =
+  let
+    workbookFileName = TempDir / contentTypes["workbook"]
+    workbookRels = parseRelationships(workbookFileName.getRelsFileName)
+
+  result = collect(initTable(workbook.data.len)):
+    for sheetName, rId in workbook.data.pairs:
+      let
+        internalSheetName = workbookRels[rId].splitFile.name
+        sheetFileName = contentTypes[internalSheetName]
+
+      {sheetName: sheetFileName}
+
 proc parseExcel*(fileName: string, sheetName = "", header = false,
     skipHeaders = false, escapeStrings = false, trailingRows = false): SheetTable =
   ## Parse excel and return SheetTable which contains
@@ -942,6 +1005,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = parseWorkBook(TempDir / contentTypes["workbook"])
     styles = parseStyles(TempDir / contentTypes["styles"])
+    sheetFileNames = parseSheetFileNames(contentTypes, workbook)
 
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
@@ -949,19 +1013,17 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
         escapeStrings = escapeStrings)
 
   if sheetName == "":
-    for key, value in workbook.data.pairs:
-      var sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
+    for name, fileName in sheetFileNames.pairs:
+      var sheet = parseSheet(TempDir / fileName, styles,
           workbook.date1904, trailingRows)
-      result.data[key] = getSheetArray(sheet, sharedString, header, skipHeaders)
+      result.data[name] = getSheetArray(sheet, sharedString, header, skipHeaders)
     return
 
-  if sheetName notin workbook.data:
+  if sheetName notin sheetFileNames:
     raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
 
-  let
-    value = workbook.data[sheetName]
   var
-    sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
+    sheet = parseSheet(TempDir / sheetFileNames[sheetName], styles,
         workbook.date1904, trailingRows)
   result.data[sheetName] = getSheetArray(sheet, sharedString, header, skipHeaders)
 
@@ -977,19 +1039,18 @@ iterator lines*(fileName: string, sheetName: string,
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = parseWorkBook(TempDir / contentTypes["workbook"])
     styles = parseStyles(TempDir / contentTypes["styles"])
+    sheetFileNames = parseSheetFileNames(contentTypes, workbook)
 
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
     sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"],
         escapeStrings = escapeStrings)
 
-  if sheetName notin workbook.data:
+  if sheetName notin sheetFileNames:
     raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
 
-  let
-    value = workbook.data[sheetName]
   var
-    sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
+    sheet = parseSheet(TempDir / sheetFileNames[sheetName], styles,
         workbook.date1904)
   for item in get(sheet, sharedString):
     if skipEmptyLines and len(item) == 0:
@@ -1246,18 +1307,18 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
     contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
     workbook = parseWorkBook(TempDir / contentTypes["workbook"])
     styles = parseStyles(TempDir / contentTypes["styles"])
+    sheetFileNames = parseSheetFileNames(contentTypes, workbook)
 
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
     sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"],
         escapeStrings = escapeStrings)
 
-  if sheetName notin workbook.data:
+  if sheetName notin sheetFileNames:
     raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
 
   let
-    value = workbook.data[sheetName]
-    sheet = parseSheet(TempDir / contentTypes["sheet" & $value], styles,
+    sheet = parseSheet(TempDir / sheetFileNames[sheetName], styles,
         workbook.date1904)
 
   result = getSheetTensor[T](sheet, sharedString, skipHeaders)

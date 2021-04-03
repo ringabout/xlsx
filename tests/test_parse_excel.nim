@@ -4,7 +4,7 @@ import xlsx
 
 
 suite "Test parse Excel":
-  let sheetName = "Sheet2"
+  let sheetName = "Sheet1"
 
   test "Parse Excel":
     let data = parseExcel("tests/test.xlsx")
@@ -21,5 +21,5 @@ suite "Test parse Excel":
     check(data == @["Sheet1", "Sheet2"])
 
   test "Read Excel by lines":
-    for line in lines("tests/test.xlsx", "Sheet2"):
+    for line in lines("tests/test.xlsx", "Sheet1"):
       discard line
