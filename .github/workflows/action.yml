@@ -39,7 +39,6 @@ jobs:
     strategy:
       matrix:
         version:
-          - 1.0.2
           - stable
     steps:
     - uses: actions/checkout@v1
