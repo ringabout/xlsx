@@ -503,8 +503,9 @@ proc parseSheetDataSharedString(x: var XmlParser): SheetData {.inline.} =
 
 proc parseSheetDataFormula(x: var XmlParser): SheetData {.inline.} =
   result = SheetData(kind: sdk.Formula)
-  # ignore <f>
-  x.next()
+  # ignore <f>, <t>, <ref>, </ref>
+  while not (x.kind in CharDataOption):
+    x.next()
   while x.kind in CharDataOption:
     result.fvalue &= x.charData
     x.next()
@@ -772,9 +773,14 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo, styles: Styles): (int, She
     while true:
       x.next()
       case x.kind
+      of xmlElementOpen:
+        if x.elementName =?= "f":
+          value = x.parseSheetDataFormula
       of xmlElementStart:
         if x.elementName =?= "f":
           value = x.parseSheetDataFormula
+        elif x.elementName =?= "v":
+          value = x.parseSheetDataNum
       of xmlElementEnd:
         if x.elementName =?= "c":
           break
