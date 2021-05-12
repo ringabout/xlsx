@@ -7,4 +7,4 @@
 
 {.warnings: off.}
 import test_parse_excel, test_sheet_array, test_read_excel, test_date,
-      test_date_time, test_empty_lines
+      test_date_time, test_empty_lines, test_formula
