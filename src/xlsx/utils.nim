@@ -1067,13 +1067,13 @@ proc `[]`*(s: SheetArray, i, j: Natural): string {.inline.} =
   # get element from SheetArray
   checkIndex(i < s.shape.rows)
   checkIndex(j < s.shape.cols)
-  s.data[i * s.shape.rows + j]
+  s.data[i * s.shape.cols + j]
 
 proc `[]=`*(s: var SheetArray, i, j: Natural, value: string) {.inline.} =
   # set element from SheetArray
   checkIndex(i < s.shape.rows)
   checkIndex(j < s.shape.cols)
-  s.data[i * s.shape.rows + j] = value
+  s.data[i * s.shape.cols + j] = value
 
 template `[]`*(s: SheetTable, key: string): SheetArray =
   s.data[key]
