@@ -841,6 +841,10 @@ proc parseSheet(fileName: string, styles: Styles, date1904: bool,
       # discard />
       x.next()
       break
+    elif x.kind == xmlEof:
+      break
+    else:
+      discard
 
   var position: int
   # parse data
