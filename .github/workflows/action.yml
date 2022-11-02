@@ -1,6 +1,7 @@
 name: Test xlsx
 
 on:
+  pull_request:
   push:
     branches:
       - master
