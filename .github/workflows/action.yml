@@ -29,8 +29,8 @@ jobs:
         path: ~/.nimble
         key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@master
-    - name: Install xlsx
-      run: nimble install https://github.com/xflywind/xlsx -y
+    - name: Install Packages
+      run: nimble install -y
     - name: Test command
       run: nimble test
 
@@ -46,7 +46,7 @@ jobs:
     - uses: jiro4989/setup-nim-action@master
       with:
         nim-version: ${{ matrix.version }}
-    - name: Install xlsx
-      run: nimble install https://github.com/xflywind/xlsx -y
+    - name: Install Packages
+      run: nimble install -y
     - name: Test command
       run: nimble test
