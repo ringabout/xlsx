@@ -2,7 +2,7 @@ import os, streams, parsexml, parseutils, tables, times, strutils
 import format
 import sugar
 
-import zip / zipfiles
+import zippy/ziparchives
 
 
 
@@ -84,11 +84,10 @@ proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
   ## default path is TempDir.
   if not existsFile(src):
     raise newException(NotExistsXlsxFileError, "No such xlsx file: " & src)
-  var z: ZipArchive
-  if not z.open(src):
+  try:
+    extractAll(src, dest)
+  except:
     raise newException(InvalidXlsxFileError, "[ZIP] Can't open xlsx file: " & src)
-  z.extractAll(dest)
-  z.close()
 
 template checkIndex(cond: untyped, msg = "") =
   when compileOption("boundChecks"):
@@ -794,7 +793,7 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo, styles: Styles): (int, She
   result = (pos, value)
 
 proc parseRowData(x: var XmlParser, s: var Sheet, styles: Styles, position: var int) {.inline.} =
-  
+
   while true:
     x.next()
     case x.kind
@@ -868,10 +867,10 @@ proc parseSheet(fileName: string, styles: Styles, date1904: bool,
       break
     else:
       discard
-  
+
   if trailingRows:
     result.data.setLen(position + 1)
-    let 
+    let
       rows = (position + 1) div result.info.cols
     result.info.rows = rows
 
@@ -998,10 +997,10 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     skipHeaders = false, escapeStrings = false, trailingRows = false): SheetTable =
   ## Parse excel and return SheetTable which contains
   ## all sheetArray.
-  ## 
+  ##
   ## `trailingRows` is used to skip empty lines after last row with elements.
   ## But If there are some empty lines before last row with elements, these lines will be kept.
-  ## 
+  ##
   ## If you want to skip all empty lines, you should use iterator `lines` and set `skipEmptyLines` = `true`.
   runnableExamples:
     let

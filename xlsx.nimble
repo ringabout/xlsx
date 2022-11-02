@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.4.6"
+version       = "0.4.7"
 author        = "flywind"
 description   = "Read and parse Excel files"
 license       = "MIT"
@@ -11,7 +11,7 @@ srcDir        = "src"
 # Dependencies
 
 requires "nim >= 1.0.0"
-requires "zip >= 0.2.1"
+requires "zippy"
 
 # tests
 task test, "Run all tests":
@@ -23,7 +23,7 @@ task test_arc, "Run all tests with arc":
 # docs
 task docs, "Generate docs":
 
-  exec "nim doc2 " & 
+  exec "nim doc2 " &
     "--git.commit:master " &
     "--index:on " &
     "--git.devel:master " &
