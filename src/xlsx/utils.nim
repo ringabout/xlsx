@@ -79,8 +79,7 @@ when defined(windows):
   {.passl: "-lz".}
 
 proc extractXml*(src: string, dest: string = getTempDir() / XLSX_TMP) {.inline.} =
-  ## extract xml file from excel using zip,
-  ## default path is tempDir.
+  ## extract xml file from excel using zip
   if not existsFile(src):
     raise newException(NotExistsXlsxFileError, "No such xlsx file: " & src)
   try:
@@ -971,7 +970,7 @@ proc parseAllSheetName*(fileName: string): seq[string] {.inline.} =
     contentTypes = parseContentTypes(tempDir / "[Content_Types].xml")
     workbook = parseWorkBook(tempDir / contentTypes["workbook"])
   defer: removeDir(tempDir)
-  
+
   result = newSeqOfCap[string](workbook.data.len)
   for key in workbook.data.keys:
     result.add(key)
