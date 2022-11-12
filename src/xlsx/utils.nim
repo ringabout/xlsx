@@ -84,8 +84,8 @@ proc extractXml*(src: string, dest: string = getTempDir() / XLSX_TMP) {.inline.}
     raise newException(NotExistsXlsxFileError, "No such xlsx file: " & src)
   try:
     extractAll(src, dest)
-  except:
-    raise newException(InvalidXlsxFileError, "[ZIP] Can't open xlsx file: " & src)
+  except CatchableError as error:
+    raise error
 
 template checkIndex(cond: untyped, msg = "") =
   when compileOption("boundChecks"):
