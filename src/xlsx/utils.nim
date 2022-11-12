@@ -82,7 +82,7 @@ proc extractXml*(src: string, dest: string = getTempDir() / XLSX_TMP) {.inline.}
   ## extract xml file from excel using zip
   if not existsFile(src):
     raise newException(NotExistsXlsxFileError, "No such xlsx file: " & src)
-  removeDir(dest)
+  removeDir(getTempDir() / XLSX_TMP)
   try:
     extractAll(src, dest)
   except CatchableError as error:
