@@ -1,7 +1,7 @@
 # Package
 
-version       = "0.4.7"
-author        = "flywind"
+version       = "0.4.8"
+author        = "Michael Green"
 description   = "Read and parse Excel files"
 license       = "MIT"
 srcDir        = "src"
@@ -27,6 +27,6 @@ task docs, "Generate docs":
     "--git.commit:master " &
     "--index:on " &
     "--git.devel:master " &
-    "--git.url:https://github.com/xflywind/xlsx " &
+    "--git.url:https://github.com/gcaliber/xlsx " &
     "-o:docs/utils.html " &
     "src/xlsx/utils.nim"
