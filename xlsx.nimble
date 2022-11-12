@@ -1,7 +1,7 @@
 # Package
 
-version       = "0.4.8"
-author        = "Michael Green"
+version       = "0.4.7"
+author        = "flywind"
 description   = "Read and parse Excel files"
 license       = "MIT"
 srcDir        = "src"
