@@ -10,7 +10,7 @@ const
   UpperLetters = {'A' .. 'Z'}
   CharDataOption = {xmlCharData, xmlWhitespace}
   DEFAULT_WORKBOOK_PATH = "xl/workbook.xml"
-let TempDir* = getTempDir() / "xlsx_windx_tmp" ## temp dir for all extracted xml files from Excel
+  TempDir* = getTempDir() / "xlsx_windx_tmp" ## temp dir for all extracted xml files from Excel
 
 
 type
