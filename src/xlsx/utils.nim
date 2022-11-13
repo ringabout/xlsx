@@ -10,7 +10,8 @@ const
   UpperLetters = {'A' .. 'Z'}
   CharDataOption = {xmlCharData, xmlWhitespace}
   DEFAULT_WORKBOOK_PATH = "xl/workbook.xml"
-  XLSX_TMP = "xlsx_windx_tmp"
+  TempDir* = getTempDir() / "xlsx_windx_tmp" ## temp dir for all extracted xml files from Excel
+
 
 type
   XlsxError* = object of Exception
@@ -78,15 +79,15 @@ type
 when defined(windows):
   {.passl: "-lz".}
 
-proc extractXml*(src: string, dest: string = getTempDir() / XLSX_TMP) {.inline.} =
-  ## extract xml file from excel using zip
+proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
+  ## extract xml file from excel using zip,
+  ## default path is TempDir.
   if not existsFile(src):
     raise newException(NotExistsXlsxFileError, "No such xlsx file: " & src)
-  removeDir(getTempDir() / XLSX_TMP)
   try:
     extractAll(src, dest)
-  except CatchableError as error:
-    raise error
+  except:
+    raise newException(InvalidXlsxFileError, "[ZIP] Can't open xlsx file: " & src)
 
 template checkIndex(cond: untyped, msg = "") =
   when compileOption("boundChecks"):
@@ -965,13 +966,11 @@ proc getSheetArray(s: Sheet, str: SharedStrings, header: bool,
 proc parseAllSheetName*(fileName: string): seq[string] {.inline.} =
   ## get all sheet name
   extractXml(fileName)
+  defer: removeDir(TempDir)
 
   let
-    tempDir = getTempDir() / XLSX_TMP
-    contentTypes = parseContentTypes(tempDir / "[Content_Types].xml")
-    workbook = parseWorkBook(tempDir / contentTypes["workbook"])
-  defer: removeDir(tempDir)
-
+    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
+    workbook = parseWorkBook(TempDir / contentTypes["workbook"])
   result = newSeqOfCap[string](workbook.data.len)
   for key in workbook.data.keys:
     result.add(key)
@@ -983,8 +982,7 @@ proc getRelsFileName(fileName: string): string =
 
 proc parseSheetFileNames(contentTypes: ContentTypes, workbook: WorkBook): Table[string, string] =
   let
-    tempDir = getTempDir() / XLSX_TMP
-    workbookFileName = tempDir / contentTypes["workbook"]
+    workbookFileName = TempDir / contentTypes["workbook"]
     workbookRels = parseRelationships(workbookFileName.getRelsFileName)
 
   result = collect(initTable(workbook.data.len)):
@@ -1011,23 +1009,21 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     echo data[sheetName]
 
   extractXml(fileName)
-  
+  defer: removeDir(TempDir)
   let
-    tempDir = getTempDir() / XLSX_TMP
-    contentTypes = parseContentTypes(tempDir / "[Content_Types].xml")
-    workbook = parseWorkBook(tempDir / contentTypes["workbook"])
-    styles = parseStyles(tempDir / contentTypes["styles"])
+    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
+    workbook = parseWorkBook(TempDir / contentTypes["workbook"])
+    styles = parseStyles(TempDir / contentTypes["styles"])
     sheetFileNames = parseSheetFileNames(contentTypes, workbook)
-  defer: removeDir(tempDir)
 
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
-    sharedString = parseSharedString(tempDir / contentTypes["sharedStrings"],
+    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"],
         escapeStrings = escapeStrings)
 
   if sheetName == "":
     for name, fileName in sheetFileNames.pairs:
-      var sheet = parseSheet(tempDir / fileName, styles,
+      var sheet = parseSheet(TempDir / fileName, styles,
           workbook.date1904, trailingRows)
       result.data[name] = getSheetArray(sheet, sharedString, header, skipHeaders)
     return
@@ -1036,7 +1032,7 @@ proc parseExcel*(fileName: string, sheetName = "", header = false,
     raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
 
   var
-    sheet = parseSheet(tempDir / sheetFileNames[sheetName], styles,
+    sheet = parseSheet(TempDir / sheetFileNames[sheetName], styles,
         workbook.date1904, trailingRows)
   result.data[sheetName] = getSheetArray(sheet, sharedString, header, skipHeaders)
 
@@ -1047,25 +1043,23 @@ iterator lines*(fileName: string, sheetName: string,
     for i in lines("tests/test.xlsx", "Sheet2"):
       echo i
   extractXml(fileName)
-
+  defer: removeDir(TempDir)
   let
-    tempDir = getTempDir() / XLSX_TMP
-    contentTypes = parseContentTypes(tempDir / "[Content_Types].xml")
-    workbook = parseWorkBook(tempDir / contentTypes["workbook"])
-    styles = parseStyles(tempDir / contentTypes["styles"])
+    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
+    workbook = parseWorkBook(TempDir / contentTypes["workbook"])
+    styles = parseStyles(TempDir / contentTypes["styles"])
     sheetFileNames = parseSheetFileNames(contentTypes, workbook)
-  defer: removeDir(tempDir)
-  
+
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
-    sharedString = parseSharedString(tempDir / contentTypes["sharedStrings"],
+    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"],
         escapeStrings = escapeStrings)
 
   if sheetName notin sheetFileNames:
     raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
 
   var
-    sheet = parseSheet(tempDir / sheetFileNames[sheetName], styles,
+    sheet = parseSheet(TempDir / sheetFileNames[sheetName], styles,
         workbook.date1904)
   for item in get(sheet, sharedString):
     if skipEmptyLines and len(item) == 0:
@@ -1317,24 +1311,23 @@ proc readExcel*[T: SomeNumber|bool|string](fileName: string,
     assert(data.data == @[1, 4, 7, 9, 4, 7, 0, 3, 12, 54, 24, 887])
 
   extractXml(fileName)
+  defer: removeDir(TempDir)
   let
-    tempDir = getTempDir() / XLSX_TMP
-    contentTypes = parseContentTypes(tempDir / "[Content_Types].xml")
-    workbook = parseWorkBook(tempDir / contentTypes["workbook"])
-    styles = parseStyles(tempDir / contentTypes["styles"])
+    contentTypes = parseContentTypes(TempDir / "[Content_Types].xml")
+    workbook = parseWorkBook(TempDir / contentTypes["workbook"])
+    styles = parseStyles(TempDir / contentTypes["styles"])
     sheetFileNames = parseSheetFileNames(contentTypes, workbook)
-  defer: removeDir(tempDir)
-  
+
   var sharedString: SharedStrings
   if "sharedStrings" in contentTypes:
-    sharedString = parseSharedString(tempDir / contentTypes["sharedStrings"],
+    sharedString = parseSharedString(TempDir / contentTypes["sharedStrings"],
         escapeStrings = escapeStrings)
 
   if sheetName notin sheetFileNames:
     raise newException(NotFoundSheetError, "no such sheet name: " & sheetName)
 
   let
-    sheet = parseSheet(tempDir / sheetFileNames[sheetName], styles,
+    sheet = parseSheet(TempDir / sheetFileNames[sheetName], styles,
         workbook.date1904)
 
   result = getSheetTensor[T](sheet, sharedString, skipHeaders)
