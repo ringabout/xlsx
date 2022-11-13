@@ -27,6 +27,6 @@ task docs, "Generate docs":
     "--git.commit:master " &
     "--index:on " &
     "--git.devel:master " &
-    "--git.url:https://github.com/gcaliber/xlsx " &
+    "--git.url:https://github.com/ringabout/xlsx " &
     "-o:docs/utils.html " &
     "src/xlsx/utils.nim"
