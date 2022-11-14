@@ -87,6 +87,7 @@ proc extractXml*(src: string, dest: string = TempDir) {.inline.} =
   try:
     extractAll(src, dest)
   except:
+    removeDir(dest)
     raise newException(InvalidXlsxFileError, "[ZIP] Can't open xlsx file: " & src)
 
 template checkIndex(cond: untyped, msg = "") =
