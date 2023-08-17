@@ -1,4 +1,4 @@
-import unittest
+import tables, unittest
 
 import xlsx
 
@@ -23,3 +23,7 @@ suite "Test parse Excel":
   test "Read Excel by lines":
     for line in lines("tests/test.xlsx", "Sheet1"):
       discard line
+
+  test "Get information from sheet":
+    let data = parseExcel("tests/test_infos.xlsx")
+    check(data.data["Sheet1"].shape == (40, 60))
