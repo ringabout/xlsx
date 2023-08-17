@@ -558,7 +558,7 @@ proc parseSheetTime(x: var XmlParser): SheetData {.inline.} =
 
 proc calculatePolynomial(a: string): int {.inline.} =
   for i in 0 .. a.high:
-    result = result * 27 + (ord(a[i]) - ord('A') + 1)
+    result = result * 26 + (ord(a[i]) - ord('A') + 1)
 
 proc parseDimension(x: string, date1904: bool): SheetInfo {.inline.} =
   # A1:B3
