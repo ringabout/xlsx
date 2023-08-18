@@ -794,7 +794,6 @@ proc parseRowMetaData(x: var XmlParser, s: SheetInfo, styles: Styles): (int, She
   result = (pos, value)
 
 proc parseRowData(x: var XmlParser, s: var Sheet, styles: Styles, position: var int) {.inline.} =
-
   while true:
     x.next()
     case x.kind
@@ -803,12 +802,14 @@ proc parseRowData(x: var XmlParser, s: var Sheet, styles: Styles, position: var 
         let (pos, value) = parseRowMetaData(x, s.info, styles)
         position = pos
         s.data[pos] = value
+    of xmlElementEnd:
+      if x.elementName =?= "row":
+        # no more cells to parse on the line
+        break
     of xmlEof:
       break
     else:
       discard
-  # ignore />
-  x.next()
 
 proc parseSheet(fileName: string, styles: Styles, date1904: bool,
     trailingRows = false): Sheet {.inline.} =
@@ -848,26 +849,31 @@ proc parseSheet(fileName: string, styles: Styles, date1904: bool,
 
   var position: int
   # parse data
-  while true:
-    x.next()
-    case x.kind
-    of xmlElementStart:
-      if x.elementName =?= "sheetData":
-        # ignore <sheetData>
-        while true:
-          x.next()
-          case x.kind
-          of xmlElementOpen:
-            if x.elementName =?= "row":
-              x.parseRowData(result, styles, position)
-          of xmlEof:
-            break
-          else:
-            discard
-    of xmlEof:
-      break
-    else:
-      discard
+  block parseSheetData:
+    while true:
+      x.next()
+      case x.kind
+      of xmlElementStart:
+        if x.elementName =?= "sheetData":
+          # ignore <sheetData>
+          while true:
+            x.next()
+            case x.kind
+            of xmlElementOpen:
+              if x.elementName =?= "row":
+                x.parseRowData(result, styles, position)
+            of xmlElementEnd:
+              if x.elementName =?= "sheetData":
+                # no more data to parse
+                break parseSheetData
+            of xmlEof:
+              break
+            else:
+              discard
+      of xmlEof:
+        break
+      else:
+        discard
 
   if trailingRows:
     result.data.setLen(position + 1)
