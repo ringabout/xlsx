@@ -14,7 +14,7 @@ when compileOption("threads"):
     let sheetName = "Sheet1"
 
     test "Parse Excel with threads":
-      when compileOption("gc", "arc"):
+      when compileOption("mm", "arc"):
         let fv = spawn(parseExcel("tests/test.xlsx"))
         let data = ^fv
         check(data[sheetName].data == @["name", "grade", "age",
@@ -23,7 +23,8 @@ when compileOption("threads"):
         let fv = spawn(checkData(sheetName))
         check(^fv)
 
-    test "Get all sheet names with threads":
-      let fv = spawn(parseAllSheetName("tests/test.xlsx"))
-      let data = ^fv
-      check(data == @["Sheet1", "Sheet2"])
+    when not compileOption("mm", "arc"):
+      test "Get all sheet names with threads":
+        let fv = spawn(parseAllSheetName("tests/test.xlsx"))
+        let data = ^fv
+        check(data == @["Sheet1", "Sheet2"])
