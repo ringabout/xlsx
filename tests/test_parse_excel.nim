@@ -18,7 +18,7 @@ suite "Test parse Excel":
 
   test "Get all sheet names":
     let data = parseAllSheetName("tests/test.xlsx")
-    check(data == @["Sheet1", "Sheet2"])
+    check(data == @["Sheet2", "Sheet1"])
 
   test "Read Excel by lines":
     for line in lines("tests/test.xlsx", "Sheet1"):
