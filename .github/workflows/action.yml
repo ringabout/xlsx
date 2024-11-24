@@ -15,7 +15,7 @@ jobs:
           - ubuntu-latest
             #- macos-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Cache choosenim
       id: cache-choosenim
       uses: actions/cache@v1
@@ -42,7 +42,7 @@ jobs:
         version:
           - stable
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - uses: jiro4989/setup-nim-action@master
       with:
         nim-version: ${{ matrix.version }}
