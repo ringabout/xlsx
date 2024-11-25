@@ -5,10 +5,12 @@ const
   FORMATS* = {
       "general": "float",
       "0": "float",
+      "0.0": "float",
       "0.00": "float",
       "#,##0": "float",
       "#,##0.00": "float",
       "0%": "percentage",
+      "0.0%": "percentage",
       "0.00%": "percentage",
       "0.00e+00": "float",
       "mm-dd-yy": "date",
