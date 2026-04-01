@@ -40,7 +40,6 @@ jobs:
     strategy:
       matrix:
         version:
-          - stable
           - devel
     steps:
     - uses: actions/checkout@v5
